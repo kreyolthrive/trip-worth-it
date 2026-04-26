@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GaugeIcon, TargetIcon } from "@/components/ui/Icons";
+import { BucketsIcon, GaugeIcon, TargetIcon } from "@/components/ui/Icons";
 
 const LINKS = [
   {
@@ -16,6 +16,12 @@ const LINKS = [
     label: "Planner",
     sub: "Reserve, income & goals",
     Icon: TargetIcon,
+  },
+  {
+    href: "/buckets",
+    label: "Savings Buckets",
+    sub: "Allocate every dollar",
+    Icon: BucketsIcon,
   },
 ];
 

@@ -133,3 +133,13 @@ export function XCircleIcon(props: IconProps) {
     </BaseIcon>
   );
 }
+
+export function BucketsIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <rect x="3" y="4.5" width="18" height="3.5" rx="1" />
+      <rect x="3" y="10.25" width="13" height="3.5" rx="1" />
+      <rect x="3" y="16" width="8" height="3.5" rx="1" />
+    </BaseIcon>
+  );
+}

@@ -295,7 +295,7 @@ export default function ResultsCard({ result, assumptions }: ResultsCardProps) {
       </div>
 
       {/* Assumptions */}
-      <div className="mx-6 mb-6 mt-3 rounded-xl border border-slate-100 bg-white px-4 py-3.5 sm:mx-7">
+      <div className="mx-6 mt-3 rounded-xl border border-slate-100 bg-white px-4 py-3.5 sm:mx-7">
         <p className="mb-2.5 text-[11px] font-bold uppercase tracking-widest text-slate-400">
           Assumptions Used
         </p>
@@ -313,6 +313,24 @@ export default function ResultsCard({ result, assumptions }: ResultsCardProps) {
             <span className="ml-1.5 font-bold text-slate-900">{fmt(assumptions.minNetPerHour)}</span>
           </div>
         </div>
+      </div>
+
+      {/* Planner CTA */}
+      <div className="mx-6 mb-6 mt-3 sm:mx-7">
+        <a
+          href="/planner"
+          className="flex items-center justify-between rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3.5 transition hover:border-indigo-200 hover:bg-indigo-100"
+        >
+          <div>
+            <p className="text-[12px] font-bold uppercase tracking-widest text-indigo-500">
+              Plan what this earns
+            </p>
+            <p className="mt-0.5 text-[13px] font-medium text-slate-700">
+              Set reserves, hit your monthly target, save for a goal →
+            </p>
+          </div>
+          <TargetIcon className="h-5 w-5 flex-shrink-0 text-indigo-400" />
+        </a>
       </div>
     </section>
   );

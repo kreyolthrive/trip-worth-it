@@ -106,6 +106,28 @@ export function loadBetaSignups(): BetaSignup[] {
   }
 }
 
+export interface RecentCheckStats {
+  count: number;
+  avgNetPerTrip: number;
+  worthTakingCount: number;
+  worthTakingPct: number;
+}
+
+export function computeRecentCheckStats(): RecentCheckStats | null {
+  const checks = loadRecentTripChecks();
+  if (checks.length === 0) return null;
+
+  const worthTaking = checks.filter((c) => c.verdict === "WORTH_TAKING").length;
+  const avgNet = checks.reduce((sum, c) => sum + c.estimatedNet, 0) / checks.length;
+
+  return {
+    count: checks.length,
+    avgNetPerTrip: Math.round(avgNet * 100) / 100,
+    worthTakingCount: worthTaking,
+    worthTakingPct: Math.round((worthTaking / checks.length) * 100),
+  };
+}
+
 export function appendBetaSignup(signup: BetaSignup) {
   const existing = loadBetaSignups();
   const isDuplicate = existing.some(

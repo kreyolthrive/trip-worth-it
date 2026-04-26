@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import AppNav from "@/components/AppNav";
 import DriverDefaultsForm from "@/components/DriverDefaultsForm";
 import EmailCapture from "@/components/EmailCapture";
 import RecentChecks from "@/components/RecentChecks";
@@ -119,6 +120,7 @@ export default function HomePage() {
       <div className="pointer-events-none absolute -right-24 top-32 h-64 w-64 rounded-full bg-indigo-400/20 blur-[80px]" />
 
       <div className="relative mx-auto w-full max-w-[1280px] px-4 pb-16 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+        <AppNav />
         {/* ── Header ────────────────────────────────────────────────── */}
         <header className="card-enter mb-8 overflow-hidden rounded-2xl border border-white/20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 shadow-[0_8px_16px_-4px_rgba(15,23,42,0.3),0_40px_80px_-12px_rgba(15,23,42,0.4)]">
           <div className="px-7 py-7 sm:px-8 sm:py-8 lg:px-10 lg:py-9">
@@ -153,6 +155,9 @@ export default function HomePage() {
             <p className="mt-3 max-w-xl text-[15px] leading-6 text-slate-300">
               Enter the offer, pickup, mileage, and time. Get a fast verdict against your
               own cost and earnings targets — before accepting.
+            </p>
+            <p className="mt-2 text-[13px] font-semibold tracking-wide text-cyan-400/80">
+              Know what to take. Know what to keep. Know what to save.
             </p>
 
             {/* Feature chips */}

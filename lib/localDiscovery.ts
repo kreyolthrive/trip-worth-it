@@ -11,6 +11,7 @@ import {
   LocalDiscoveryEvent,
   LocalDiscoveryEventType,
   LocalDiscoveryLead,
+  LocalDiscoverySnapshot,
 } from "@/types/localDiscovery";
 
 const PROJECT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -21,15 +22,6 @@ const LEADS_PATH = path.join(LOCAL_DISCOVERY_DIR, "local-discovery-leads.json");
 const EVENT_TYPES = ["scan", "business_click", "category_tap"] as const;
 const LEAD_STATUSES = ["new", "contacted", "closed"] as const;
 const CONVERSION_STATUSES = ["pending", "approved", "rejected"] as const;
-
-export type LocalDiscoveryStorageMode = "supabase" | "json_file" | "demo";
-
-export interface LocalDiscoverySnapshot {
-  events: LocalDiscoveryEvent[];
-  leads: LocalDiscoveryLead[];
-  storageMode: LocalDiscoveryStorageMode;
-  storageMessage: string;
-}
 
 function optionalString(value: unknown, maxLength: number) {
   if (typeof value !== "string") return undefined;

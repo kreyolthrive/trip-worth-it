@@ -1,6 +1,7 @@
 export type LocalDiscoveryEventType = "scan" | "business_click" | "category_tap";
 export type LocalDiscoveryLeadStatus = "new" | "contacted" | "closed";
 export type LocalDiscoveryConversionStatus = "pending" | "approved" | "rejected";
+export type LocalDiscoveryStorageMode = "supabase" | "json_file" | "demo";
 
 export interface LocalDiscoveryEvent {
   id?: string;
@@ -53,4 +54,11 @@ export interface DriverPerformanceSummary {
   conversion_value: number;
   estimated_payout: number;
   approved_payout: number;
+}
+
+export interface LocalDiscoverySnapshot {
+  events: LocalDiscoveryEvent[];
+  leads: LocalDiscoveryLead[];
+  storageMode: LocalDiscoveryStorageMode;
+  storageMessage: string;
 }

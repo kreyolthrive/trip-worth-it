@@ -169,30 +169,51 @@ export default function LocalDiscoveryTracker({
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  event.preventDefault();
+
+  const form = event.currentTarget;
     setSubmitStatus("saving");
     setErrorMessage("");
-
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const sessionId = visitorSessionIdRef.current || getVisitorSessionId();
     visitorSessionIdRef.current = sessionId;
 
     try {
-      await postJson("/api/local-discovery/leads", {
-        business_name: selectedBusiness,
-        category: selectedCategory,
-        customer_name: formData.get("customer_name"),
-        customer_phone: formData.get("customer_phone"),
-        customer_email: formData.get("customer_email"),
-        message: formData.get("message"),
-        driver_slug: driverSlug,
-        visitor_session_id: sessionId,
-        city: "miami",
-        created_at: new Date().toISOString(),
-      });
+await postJson("/api/local-discovery/leads", {
+  business_name: selectedBusiness,
+  category: selectedCategory,
+  customer_name: formData.get("customer_name"),
+  customer_phone: formData.get("customer_phone"),
+  customer_email: formData.get("customer_email"),
+  message: formData.get("message"),
+  driver_slug: driverSlug,
+  visitor_session_id: sessionId,
+  city: "miami",
+  created_at: new Date().toISOString(),
+});
 
-      event.currentTarget.reset();
-      setSubmitStatus("success");
+await postJson("/api/pilot-events", {
+  eventType: "lead_submitted",
+  driverSlug,
+  businessSlug: selectedBusiness
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, ""),
+  category: selectedCategory,
+  neighborhood: "Miami",
+  pagePath: pathname,
+  metadata: {
+    business_name: selectedBusiness,
+    visitor_session_id: sessionId,
+    source: "local_discovery_request_form",
+    utm_source: utmSource,
+    utm_medium: utmMedium,
+    utm_campaign: utmCampaign,
+  },
+});
+
+form.reset();
+setSubmitStatus("success");
     } catch (error) {
       setSubmitStatus("error");
       setErrorMessage(error instanceof Error ? error.message : "Could not submit your request.");

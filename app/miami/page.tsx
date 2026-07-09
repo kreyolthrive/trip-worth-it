@@ -1,13 +1,15 @@
+import PilotClickTracker from "@/components/PilotClickTracker";
+import PilotPageTracker from "@/components/PilotPageTracker";
 import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 import LocalDiscoveryTracker from "@/components/LocalDiscoveryTracker";
-
 type BusinessMedia = {
   slug: string;
   logoUrl?: string;
   imageUrl?: string;
   imageAlt?: string;
 };
+
 
 type FeaturedBusiness = BusinessMedia & {
   name: string;
@@ -19,12 +21,14 @@ type FeaturedBusiness = BusinessMedia & {
   tone?: string;
 };
 
+
 type Category = {
   name: string;
   href: string;
   description: string;
   accent: string;
 };
+
 
 type BusinessListing = BusinessMedia & {
   name: string;
@@ -36,6 +40,7 @@ type BusinessListing = BusinessMedia & {
   tone?: string;
 };
 
+
 type ListingSection = {
   id: string;
   title: string;
@@ -43,29 +48,37 @@ type ListingSection = {
   listings: BusinessListing[];
 };
 
+
 /*
   IMAGE RULES:
 
+
   Put images inside /public, then reference them without "public".
+
 
   Example:
   public/Barber-shop-trip-worth-it.png
 
+
   Use:
   imageUrl: "/Barber-shop-trip-worth-it.png"
+
 
   Better future structure:
   public/local-discovery/businesses/business-slug/cover.png
   public/local-discovery/businesses/business-slug/logo.png
 
+
   Use:
   imageUrl: "/local-discovery/businesses/business-slug/cover.png"
   logoUrl: "/local-discovery/businesses/business-slug/logo.png"
+
 
   imageUrl = big cover image
   logoUrl = small business logo
   href = business website, booking link, phone number, or offer page
 */
+
 
 const featuredBusinesses: FeaturedBusiness[] = [
   {
@@ -112,6 +125,7 @@ const featuredBusinesses: FeaturedBusiness[] = [
   },
 ];
 
+
 const categories: Category[] = [
   {
     name: "Food & Restaurants",
@@ -150,6 +164,7 @@ const categories: Category[] = [
     accent: "border-emerald-200 bg-emerald-50 text-emerald-950",
   },
 ];
+
 
 const listingSections: ListingSection[] = [
   {
@@ -349,6 +364,7 @@ const listingSections: ListingSection[] = [
   },
 ];
 
+
 const leadTargets = listingSections.flatMap((section) =>
   section.listings.map((listing) => ({
     businessName: listing.name,
@@ -356,11 +372,13 @@ const leadTargets = listingSections.flatMap((section) =>
   }))
 );
 
+
 export const metadata: Metadata = {
   title: "Miami Local Guide | Deals, Services & Local Support",
   description:
     "A rider-friendly Miami local guide for food, care support, beauty, auto help, events, and useful local services.",
 };
+
 
 function getInitials(name: string) {
   return name
@@ -371,9 +389,11 @@ function getInitials(name: string) {
     .join("");
 }
 
+
 function isExternalHref(href: string) {
   return href.startsWith("http://") || href.startsWith("https://");
 }
+
 
 function TrackingLink({
   href,
@@ -405,6 +425,7 @@ function TrackingLink({
   );
 }
 
+
 function BusinessLogo({
   business,
   size = "md",
@@ -414,6 +435,7 @@ function BusinessLogo({
 }) {
   const sizeClass = size === "sm" ? "h-12 w-12 text-sm" : "h-16 w-16 text-base";
   const backgroundImage = business.logoUrl ? `url("${business.logoUrl}")` : undefined;
+
 
   return (
     <div
@@ -434,6 +456,7 @@ function BusinessLogo({
   );
 }
 
+
 function BusinessMediaPanel({
   business,
   compact = false,
@@ -445,6 +468,7 @@ function BusinessMediaPanel({
   const backgroundImage = business.imageUrl
     ? `linear-gradient(180deg, rgba(15,23,42,0.02), rgba(15,23,42,0.08)), url("${business.imageUrl}")`
     : undefined;
+
 
   return (
     <div
@@ -461,7 +485,9 @@ function BusinessMediaPanel({
         <div className="absolute inset-0 bg-gradient-to-br from-white via-cyan-50 to-slate-100" />
       )}
 
+
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_22%,rgba(6,182,212,0.18),transparent_28%),radial-gradient(circle_at_82%_10%,rgba(244,114,182,0.14),transparent_24%)]" />
+
 
       {!business.imageUrl ? (
         <div className="absolute bottom-4 left-4 right-4">
@@ -475,6 +501,7 @@ function BusinessMediaPanel({
   );
 }
 
+
 function FeaturedCard({ business }: { business: FeaturedBusiness }) {
   return (
     <article className="group flex min-h-[34rem] flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_24px_70px_-45px_rgba(15,23,42,0.75)] transition hover:-translate-y-1 hover:shadow-[0_30px_80px_-48px_rgba(15,23,42,0.9)]">
@@ -484,6 +511,7 @@ function FeaturedCard({ business }: { business: FeaturedBusiness }) {
           <BusinessLogo business={business} />
         </div>
       </div>
+
 
       <div className="flex flex-1 flex-col pt-10">
         <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
@@ -497,6 +525,7 @@ function FeaturedCard({ business }: { business: FeaturedBusiness }) {
           {business.offer}
         </p>
 
+
         <div className="mt-auto pt-5">
           <TrackingLink
             href={business.href}
@@ -507,6 +536,7 @@ function FeaturedCard({ business }: { business: FeaturedBusiness }) {
           >
             {business.cta}
           </TrackingLink>
+
 
           <a
             href="#request-info"
@@ -525,10 +555,12 @@ function FeaturedCard({ business }: { business: FeaturedBusiness }) {
   );
 }
 
+
 function ListingCard({ listing, section }: { listing: BusinessListing; section: ListingSection }) {
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.72)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_65px_-45px_rgba(15,23,42,0.85)]">
       <BusinessMediaPanel business={listing} compact />
+
 
       <div className="mt-4 flex items-start gap-3">
         <BusinessLogo business={listing} size="sm" />
@@ -542,13 +574,16 @@ function ListingCard({ listing, section }: { listing: BusinessListing; section: 
         </div>
       </div>
 
+
       <p className="mt-4 text-sm leading-6 text-slate-600">{listing.description}</p>
+
 
       {listing.offer ? (
         <p className="mt-4 rounded-2xl bg-cyan-50 px-3 py-2 text-sm font-black leading-5 text-cyan-950">
           {listing.offer}
         </p>
       ) : null}
+
 
       <div className="mt-auto pt-5">
         <TrackingLink
@@ -560,6 +595,7 @@ function ListingCard({ listing, section }: { listing: BusinessListing; section: 
         >
           {listing.cta}
         </TrackingLink>
+
 
         <a
           href="#request-info"
@@ -577,14 +613,25 @@ function ListingCard({ listing, section }: { listing: BusinessListing; section: 
   );
 }
 
+
 export default function MiamiPage() {
   return (
     <main className="min-h-screen overflow-x-clip bg-[#f4f7fb] text-slate-950">
+      <Suspense fallback={null}>
+        <PilotPageTracker eventType="miami_page_view" neighborhood="Miami" />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <PilotClickTracker />
+      </Suspense>
+
       <div className="pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:44px_44px]" />
+
 
       <div className="relative">
         <section className="relative overflow-hidden bg-white">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(6,182,212,0.2),transparent_30%),radial-gradient(circle_at_84%_8%,rgba(244,114,182,0.16),transparent_26%),linear-gradient(180deg,#ffffff,#f4f7fb)]" />
+
 
           <div className="relative mx-auto w-full max-w-6xl px-4 pb-14 pt-7 sm:px-6 lg:px-8">
             <header className="flex items-center justify-between gap-4">
@@ -597,6 +644,7 @@ export default function MiamiPage() {
                 </p>
               </div>
 
+
               <TrackingLink
                 href="#featured"
                 event="hero_primary_cta"
@@ -606,24 +654,29 @@ export default function MiamiPage() {
               </TrackingLink>
             </header>
 
+
             <div className="grid items-center gap-10 py-14 lg:grid-cols-[minmax(0,1fr)_440px] lg:py-20">
               <div className="max-w-3xl">
                 <div className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1.5 text-xs font-black text-cyan-900 shadow-sm">
                   Scan. Explore. Request info.
                 </div>
 
+
                 <h1 className="mt-5 text-[3.1rem] font-black leading-[0.96] tracking-[-0.06em] text-slate-950 sm:text-6xl lg:text-7xl">
                   Discover Miami businesses worth visiting
                 </h1>
+
 
                 <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
                   Food, care support, beauty, auto help, events, and useful local
                   services — all in one rider-friendly guide.
                 </p>
 
+
                 <p className="mt-3 max-w-xl text-sm font-semibold leading-6 text-slate-500">
                   Built for riders, visitors, and locals moving around Miami.
                 </p>
+
 
                 <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                   <TrackingLink
@@ -634,6 +687,7 @@ export default function MiamiPage() {
                     Explore Featured Picks
                   </TrackingLink>
 
+
                   <TrackingLink
                     href="#categories"
                     event="hero_category_cta"
@@ -643,6 +697,7 @@ export default function MiamiPage() {
                   </TrackingLink>
                 </div>
               </div>
+
 
               <aside className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_30px_90px_-55px_rgba(15,23,42,0.8)]">
                 <div className="rounded-[1.5rem] bg-slate-950 p-4 text-white">
@@ -659,6 +714,7 @@ export default function MiamiPage() {
                       Live pilot
                     </span>
                   </div>
+
 
                   <div className="mt-4 space-y-3">
                     {featuredBusinesses.map((business) => (
@@ -681,6 +737,7 @@ export default function MiamiPage() {
                       </div>
                     ))}
                   </div>
+
 
                   <div className="mt-5 grid grid-cols-3 gap-2 text-center">
                     <div className="rounded-2xl bg-white/[0.06] p-3">
@@ -708,6 +765,7 @@ export default function MiamiPage() {
           </div>
         </section>
 
+
         <div className="relative mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
           <section id="featured" className="scroll-mt-6 pt-10">
             <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -725,12 +783,14 @@ export default function MiamiPage() {
               </p>
             </div>
 
+
             <div className="grid gap-5 lg:grid-cols-3">
               {featuredBusinesses.map((business) => (
                 <FeaturedCard key={business.name} business={business} />
               ))}
             </div>
           </section>
+
 
           <section id="categories" className="mt-14 scroll-mt-6">
             <div className="mb-5">
@@ -741,6 +801,7 @@ export default function MiamiPage() {
                 Browse by Category
               </h2>
             </div>
+
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {categories.map((category) => (
@@ -760,6 +821,7 @@ export default function MiamiPage() {
             </div>
           </section>
 
+
           <div className="mt-14 space-y-12">
             {listingSections.map((section) => (
               <section key={section.id} id={section.id} className="scroll-mt-6">
@@ -773,6 +835,7 @@ export default function MiamiPage() {
                     </h2>
                   </div>
 
+
                   <TrackingLink
                     href="#categories"
                     event="back_to_categories"
@@ -783,6 +846,7 @@ export default function MiamiPage() {
                   </TrackingLink>
                 </div>
 
+
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                   {section.listings.map((listing) => (
                     <ListingCard key={listing.name} listing={listing} section={section} />
@@ -792,9 +856,11 @@ export default function MiamiPage() {
             ))}
           </div>
 
+
           <Suspense fallback={null}>
             <LocalDiscoveryTracker leadTargets={leadTargets} />
           </Suspense>
+
 
           <section className="mt-12 overflow-hidden rounded-[2rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-[0_24px_70px_-40px_rgba(15,23,42,0.75)] sm:p-8">
             <div className="grid gap-6 md:grid-cols-[1fr_260px] md:items-center">
@@ -811,6 +877,7 @@ export default function MiamiPage() {
                 </p>
               </div>
 
+
               <TrackingLink
                 href="#featured"
                 event="visitor_block_cta"
@@ -820,6 +887,7 @@ export default function MiamiPage() {
               </TrackingLink>
             </div>
           </section>
+
 
           <footer className="py-8 text-center text-sm font-semibold text-slate-500">
             <p>Local businesses and useful services featured for riders and visitors.</p>

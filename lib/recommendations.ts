@@ -2,6 +2,7 @@ export type ParticipationTier = "free" | "affordable" | "boosted" | "premium";
 
 export type BusinessRecommendationInput = {
   id: string;
+  databaseId?: string;
   name: string;
   category: string;
   description?: string | null;
@@ -252,4 +253,4 @@ export function rankBusinessRecommendations(
   }
 
   return selected.sort((a, b) => b.score - a.score).slice(0, limit);
-}
+} 

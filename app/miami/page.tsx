@@ -1,5 +1,7 @@
 import BusinessActionTracker from "@/components/BusinessActionTracker";
+import BusinessMediaGallery from "@/components/BusinessMediaGallery";
 import LocalDiscoveryTracker from "@/components/LocalDiscoveryTracker";
+import MiamiDiscoverySearch from "@/components/MiamiDiscoverySearch";
 import PilotClickTracker from "@/components/PilotClickTracker";
 import PilotPageTracker from "@/components/PilotPageTracker";
 import type { Metadata } from "next";
@@ -666,88 +668,33 @@ function BusinessLogo({
 function BusinessMediaPanel({
   business,
   compact = false,
-  background = false,
 }: {
   business: FeaturedBusiness | BusinessListing;
   compact?: boolean;
-  background?: boolean;
 }) {
-  const height = background
-    ? "absolute inset-0 h-full w-full"
-    : compact
-      ? "h-[300px] sm:h-[390px]"
-      : "h-[340px] sm:h-[480px]";
-  const hasPrimaryVideo = Boolean(business.videoUrl);
-  const hasHoverVideo = Boolean(business.hoverVideoUrl);
-  const hasAlternateMedia = Boolean(
-    business.hoverImageUrl || business.hoverVideoUrl
-  );
+  const primary = business.videoUrl
+    ? { src: business.videoUrl, type: "video" as const, poster: business.imageUrl }
+    : business.imageUrl
+      ? { src: business.imageUrl, type: "image" as const }
+      : undefined;
 
-  const primaryBackgroundImage = business.imageUrl
-    ? `linear-gradient(180deg, rgba(15,23,42,0.02), rgba(15,23,42,0.08)), url("${business.imageUrl}")`
-    : undefined;
-
-  const hoverBackgroundImage = business.hoverImageUrl
-    ? `linear-gradient(180deg, rgba(15,23,42,0.05), rgba(15,23,42,0.18)), url("${business.hoverImageUrl}")`
-    : undefined;
+  const secondary = business.hoverVideoUrl
+    ? {
+        src: business.hoverVideoUrl,
+        type: "video" as const,
+        poster: business.hoverImageUrl ?? business.imageUrl,
+      }
+    : business.hoverImageUrl
+      ? { src: business.hoverImageUrl, type: "image" as const }
+      : undefined;
 
   return (
-    <div
-      className={`group/media overflow-hidden ${hasAlternateMedia ? "business-media-has-alternate" : ""} ${background ? "rounded-[inherit]" : "relative rounded-[1.5rem]"} ${height} bg-slate-100`}
-      role="img"
-      aria-label={business.imageAlt ?? business.name}
-    >
-      {hasPrimaryVideo ? (
-        <video
-          className="business-primary-media absolute inset-0 h-full w-full object-cover transition duration-700 ease-out group-hover/media:scale-105 group-hover/media:opacity-0"
-          src={business.videoUrl}
-          poster={business.imageUrl}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-        />
-      ) : business.imageUrl ? (
-        <div
-          className="business-primary-media absolute inset-0 bg-cover bg-center transition duration-700 ease-out group-hover/media:scale-105 group-hover/media:opacity-0"
-          style={{ backgroundImage: primaryBackgroundImage }}
-        />
-      ) : (
-        <div className="absolute inset-0 bg-gradient-to-br from-white via-cyan-50 to-slate-100" />
-      )}
-
-      {hasHoverVideo ? (
-        <video
-          className="business-secondary-media absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition duration-700 ease-out group-hover/media:scale-100 group-hover/media:opacity-100"
-          src={business.hoverVideoUrl}
-          poster={business.hoverImageUrl ?? business.imageUrl}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-        />
-      ) : business.hoverImageUrl ? (
-        <div
-          className="business-secondary-media absolute inset-0 scale-105 bg-cover bg-center opacity-0 transition duration-700 ease-out group-hover/media:scale-100 group-hover/media:opacity-100"
-          style={{ backgroundImage: hoverBackgroundImage }}
-        />
-      ) : null}
-
-      {!business.imageUrl && !business.videoUrl ? (
-        <div className="absolute bottom-4 left-4 right-4">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
-            Local business
-          </p>
-          <p className="mt-1 text-sm font-black text-slate-950">
-            {business.name}
-          </p>
-        </div>
-      ) : null}
-    </div>
+    <BusinessMediaGallery
+      primary={primary}
+      secondary={secondary}
+      alt={business.imageAlt ?? business.name}
+      compact={compact}
+    />
   );
 }
 
@@ -819,7 +766,11 @@ function ListingCard({
   section: ListingSection;
 }) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-[0_24px_70px_-42px_rgba(15,23,42,0.72)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_32px_82px_-42px_rgba(6,182,212,0.28)] sm:p-4">
+    <article
+      data-discovery-card
+      data-discovery-search={`${listing.name} ${listing.category ?? section.title} ${listing.description} ${listing.offer ?? ""}`}
+      className="group flex h-full flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-3 shadow-[0_24px_70px_-42px_rgba(15,23,42,0.72)] transition duration-500 hover:-translate-y-1 hover:shadow-[0_32px_82px_-42px_rgba(6,182,212,0.28)] sm:p-4"
+    >
       <BusinessMediaPanel business={listing} compact />
 
       <div className="flex flex-1 flex-col px-2 pb-2 pt-5 sm:px-3">
@@ -983,6 +934,8 @@ export default function MiamiPage() {
                   Browse Categories
                 </TrackingLink>
               </div>
+
+              <MiamiDiscoverySearch />
             </div>
         </div>
       </section>
@@ -1076,7 +1029,12 @@ export default function MiamiPage() {
       <div className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
         <div className="mt-10 space-y-16">
           {listingSections.map((section) => (
-            <section key={section.id} id={section.id} className="scroll-mt-6">
+            <section
+              key={section.id}
+              id={section.id}
+              data-discovery-section
+              className="scroll-mt-6"
+            >
               <div className="mb-5 flex items-end justify-between gap-4 border-b border-slate-200 pb-4">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">

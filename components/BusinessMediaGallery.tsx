@@ -1,0 +1,151 @@
+"use client";
+
+import { useRef, useState } from "react";
+
+type MediaItem = {
+  src: string;
+  type: "image" | "video";
+  poster?: string;
+};
+
+export default function BusinessMediaGallery({
+  primary,
+  secondary,
+  alt,
+  compact = false,
+}: {
+  primary?: MediaItem;
+  secondary?: MediaItem;
+  alt: string;
+  compact?: boolean;
+}) {
+  const candidates = [primary, secondary].filter(Boolean) as MediaItem[];
+  const items = candidates.filter(
+    (item, index) =>
+      candidates.findIndex(
+        (candidate) =>
+          candidate.src === item.src && candidate.type === item.type
+      ) === index
+  );
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const height = compact
+    ? "h-80 sm:h-[390px]"
+    : "h-[420px] sm:h-[480px]";
+
+  function renderMedia(item: MediaItem, index: number) {
+    if (item.type === "video") {
+      return (
+        <video
+          className="h-full w-full object-cover"
+          src={item.src}
+          poster={item.poster}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-label={`${alt}${index > 0 ? `, view ${index + 1}` : ""}`}
+        />
+      );
+    }
+
+    return (
+      <div
+        className="h-full w-full bg-cover bg-center"
+        style={{ backgroundImage: `url("${item.src}")` }}
+        role="img"
+        aria-label={`${alt}${index > 0 ? `, view ${index + 1}` : ""}`}
+      />
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className={`${height} rounded-[1.5rem] bg-gradient-to-br from-cyan-50 to-slate-200`} />
+    );
+  }
+
+  return (
+    <div className="business-gallery group/gallery">
+      <div
+        ref={trackRef}
+        onScroll={(event) => {
+          const width = event.currentTarget.clientWidth;
+          if (width > 0) {
+            setActiveIndex(Math.round(event.currentTarget.scrollLeft / width));
+          }
+        }}
+        className={`${height} business-gallery-track overflow-hidden rounded-[1.5rem] bg-slate-100`}
+      >
+        {items.map((item, index) => (
+          <div
+            key={`${item.src}-${index}`}
+            className={`business-gallery-slide ${index === 1 ? "business-gallery-secondary" : ""}`}
+          >
+            {renderMedia(item, index)}
+          </div>
+        ))}
+      </div>
+
+      {items.length > 1 ? (
+        <div className="mt-3 flex items-center justify-center gap-2" aria-label="Media gallery position">
+          {items.map((item, index) => (
+            <button
+              key={`${item.src}-indicator-${index}`}
+              type="button"
+              aria-label={`Show media ${index + 1}`}
+              aria-current={activeIndex === index ? "true" : undefined}
+              onClick={() => {
+                const track = trackRef.current;
+                if (!track) return;
+                track.scrollTo({ left: track.clientWidth * index, behavior: "smooth" });
+                setActiveIndex(index);
+              }}
+              className={`h-2.5 rounded-full transition-all ${
+                activeIndex === index ? "w-7 bg-cyan-500" : "w-2.5 bg-slate-300 hover:bg-slate-400"
+              }`}
+            />
+          ))}
+          <span className="ml-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 md:hidden">
+            Swipe
+          </span>
+        </div>
+      ) : null}
+
+      <style>{`
+        .business-gallery-track { position: relative; }
+        .business-gallery-slide { position: absolute; inset: 0; transition: opacity 700ms ease, transform 700ms ease; }
+        .business-gallery-secondary { opacity: 0; transform: scale(1.035); }
+        .business-gallery:hover .business-gallery-secondary,
+        .business-gallery:focus-within .business-gallery-secondary { opacity: 1; transform: scale(1); }
+        .business-gallery:hover .business-gallery-slide:first-child,
+        .business-gallery:focus-within .business-gallery-slide:first-child { opacity: 0; transform: scale(1.025); }
+
+        @media (hover: none), (pointer: coarse) {
+          .business-gallery-track {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+          }
+          .business-gallery-track::-webkit-scrollbar { display: none; }
+          .business-gallery-slide,
+          .business-gallery-secondary {
+            position: relative;
+            inset: auto;
+            min-width: 100%;
+            opacity: 1;
+            transform: none;
+            scroll-snap-align: start;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .business-gallery-slide { transition: none; }
+          .business-gallery-track { scroll-behavior: auto; }
+        }
+      `}</style>
+    </div>
+  );
+}

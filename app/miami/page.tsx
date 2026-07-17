@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Suspense, type ReactNode } from "react";
 import LocalDiscoveryTracker from "@/components/LocalDiscoveryTracker";
 import Image from "next/image";
+import BusinessActionTracker from "@/components/BusinessActionTracker";
 
 type BusinessMedia = {
   slug: string;
@@ -404,6 +405,23 @@ function isExternalHref(href: string) {
   return href.startsWith("http://") || href.startsWith("https://");
 }
 
+function getBusinessActionType(href: string, cta: string) {
+  const lowerHref = href.toLowerCase();
+  const lowerCta = cta.toLowerCase();
+
+  if (lowerHref.startsWith("tel:")) return "call_click";
+  if (lowerHref.includes("maps.google") || lowerCta.includes("direction")) {
+    return "directions_click";
+  }
+  if (lowerHref.startsWith("http://") || lowerHref.startsWith("https://")) {
+    return "website_click";
+  }
+  if (lowerCta.includes("offer")) return "offer_click";
+  if (lowerCta.includes("save")) return "save_click";
+
+  return "business_click";
+}
+
 function TrackingLink({
   href,
   children,
@@ -411,6 +429,9 @@ function TrackingLink({
   event,
   category,
   business,
+  action,
+  businessSlug,
+  businessName,
 }: {
   href: string;
   children: ReactNode;
@@ -418,6 +439,9 @@ function TrackingLink({
   event: string;
   category?: string;
   business?: string;
+  action?: string;
+  businessSlug?: string;
+  businessName?: string;
 }) {
   return (
     <a
@@ -426,6 +450,10 @@ function TrackingLink({
       data-track-event={event}
       data-track-category={category}
       data-track-business={business}
+      data-business-action={action}
+      data-business-slug={businessSlug}
+      data-business-name={businessName ?? business}
+      data-business-category={category}
       target={isExternalHref(href) ? "_blank" : undefined}
       rel={isExternalHref(href) ? "noopener noreferrer" : undefined}
     >
@@ -559,6 +587,9 @@ function FeaturedCard({ business }: { business: FeaturedBusiness }) {
             event="featured_business_cta"
             category={business.category}
             business={business.name}
+            businessSlug={business.slug}
+            businessName={business.name}
+            action={getBusinessActionType(business.href, business.cta)}
             className="btn-press inline-flex min-h-11 w-full items-center justify-center rounded-full bg-slate-950 px-5 text-sm font-black text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
           >
             {business.cta}
@@ -571,6 +602,10 @@ function FeaturedCard({ business }: { business: FeaturedBusiness }) {
             data-track-event="lead_intent"
             data-track-category={business.category}
             data-track-business={business.name}
+            data-business-action="request_info_click"
+            data-business-slug={business.slug}
+            data-business-name={business.name}
+            data-business-category={business.category}
             className="btn-press mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-sm font-black text-slate-900 hover:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
           >
             Request Info
@@ -618,6 +653,9 @@ function ListingCard({
           event="listing_business_cta"
           category={section.title}
           business={listing.name}
+          businessSlug={listing.slug}
+          businessName={listing.name}
+          action={getBusinessActionType(listing.href, listing.cta)}
           className="btn-press inline-flex min-h-10 w-full items-center justify-center rounded-full bg-slate-950 px-4 text-sm font-black text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
         >
           {listing.cta}
@@ -630,6 +668,10 @@ function ListingCard({
           data-track-event="lead_intent"
           data-track-category={section.title}
           data-track-business={listing.name}
+          data-business-action="request_info_click"
+          data-business-slug={listing.slug}
+          data-business-name={listing.name}
+          data-business-category={section.title}
           className="btn-press mt-2 inline-flex min-h-10 w-full items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-sm font-black text-slate-900 hover:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2"
         >
           Get This Offer
@@ -648,6 +690,10 @@ export default function MiamiPage() {
 
       <Suspense fallback={null}>
         <PilotClickTracker />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <BusinessActionTracker />
       </Suspense>
 
       {/* Sticky Header */}

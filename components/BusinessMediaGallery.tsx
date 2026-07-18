@@ -32,6 +32,7 @@ export default function BusinessMediaGallery({
   );
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const safeActiveIndex = activeIndex < items.length ? activeIndex : 0;
   const height = compact
     ? "h-64 sm:h-[390px]"
     : "h-72 sm:h-[480px]";
@@ -82,6 +83,27 @@ export default function BusinessMediaGallery({
     <div className="business-gallery group/gallery">
       <div
         ref={trackRef}
+        role={items.length > 1 ? "button" : undefined}
+        tabIndex={items.length > 1 ? 0 : undefined}
+        aria-label={
+          items.length > 1
+            ? `Show next photo for ${alt}`
+            : undefined
+        }
+        onClick={() => {
+          if (
+            items.length > 1 &&
+            window.matchMedia("(hover: none), (pointer: coarse)").matches
+          ) {
+            setActiveIndex((current) => (current + 1) % items.length);
+          }
+        }}
+        onKeyDown={(event) => {
+          if (items.length > 1 && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            setActiveIndex((current) => (current + 1) % items.length);
+          }
+        }}
         onScroll={(event) => {
           const width = event.currentTarget.clientWidth;
           if (width > 0) {
@@ -93,7 +115,7 @@ export default function BusinessMediaGallery({
         {items.map((item, index) => (
           <div
             key={`${item.src}-${index}`}
-            className={`business-gallery-slide ${index === 1 ? "business-gallery-secondary" : ""}`}
+            className={`business-gallery-slide ${index === 1 ? "business-gallery-secondary" : ""} ${safeActiveIndex === index ? "business-gallery-mobile-active" : ""}`}
           >
             {renderMedia(item, index)}
           </div>
@@ -101,13 +123,13 @@ export default function BusinessMediaGallery({
       </div>
 
       {items.length > 1 ? (
-        <div className="mt-3 hidden items-center justify-center gap-2 md:flex" aria-label="Media gallery position">
+        <div className="mt-3 flex items-center justify-center gap-2 md:hidden" aria-label="Media gallery position">
           {items.map((item, index) => (
             <button
               key={`${item.src}-indicator-${index}`}
               type="button"
               aria-label={`Show media ${index + 1}`}
-              aria-current={activeIndex === index ? "true" : undefined}
+              aria-current={safeActiveIndex === index ? "true" : undefined}
               onClick={() => {
                 const track = trackRef.current;
                 if (!track) return;
@@ -115,10 +137,13 @@ export default function BusinessMediaGallery({
                 setActiveIndex(index);
               }}
               className={`h-2.5 rounded-full transition-all ${
-                activeIndex === index ? "w-7 bg-cyan-500" : "w-2.5 bg-slate-300 hover:bg-slate-400"
+                safeActiveIndex === index ? "w-7 bg-cyan-500" : "w-2.5 bg-slate-300 hover:bg-slate-400"
               }`}
             />
           ))}
+          <span className="ml-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 md:hidden">
+            Tap image
+          </span>
         </div>
       ) : null}
 
@@ -139,7 +164,7 @@ export default function BusinessMediaGallery({
           .business-gallery-slide {
             display: none;
           }
-          .business-gallery-slide:first-child {
+          .business-gallery-slide.business-gallery-mobile-active {
             display: block;
             position: absolute;
             inset: 0;

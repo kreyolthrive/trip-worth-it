@@ -46,18 +46,32 @@ export default function BusinessMediaGallery({
   function renderMedia(item: MediaItem, index: number) {
     if (item.type === "video") {
       return (
-        <video
-          className="h-full w-full object-cover"
-          src={item.src}
-          poster={item.poster}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          onError={() => markFailed(item.src)}
-          aria-label={`${alt}${index > 0 ? `, view ${index + 1}` : ""}`}
-        />
+        <div className="relative h-full w-full overflow-hidden bg-slate-950">
+          <video
+            className="absolute inset-0 h-full w-full scale-110 object-cover opacity-65 blur-xl"
+            src={item.src}
+            poster={item.poster}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-slate-950/15" />
+          <video
+            className="relative z-10 h-full w-full object-contain"
+            src={item.src}
+            poster={item.poster}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            onError={() => markFailed(item.src)}
+            aria-label={`${alt}${index > 0 ? `, view ${index + 1}` : ""}`}
+          />
+        </div>
       );
     }
 

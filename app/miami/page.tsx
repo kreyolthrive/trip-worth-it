@@ -196,19 +196,22 @@ const listingSections: ListingSection[] = [
         cta: "Visit",
         href: "#biscayne-coffee-stop",
       },
-      {
-        slug: "magic-city-tacos",
-        name: "Magic City Tacos",
-        category: "Food & Restaurants",
-        description:
-          "Street tacos, rice bowls, and quick dinner combos near nightlife stops.",
-        imageUrl: "/restaurat2-trip-worth-it.png",
-        hoverImageUrl: "/restaurant3trip-worth-it.png",
-        logoUrl: "/restaurat2-trip-worth-it.png",
-        imageAlt: "Fresh food plate in a warm restaurant setting",
-        cta: "Learn More",
-        href: "#magic-city-tacos",
-      },
+  {
+    slug: "magic-city-tacos",
+    name: "Magic City Tacos",
+    category: "Food & Restaurants",
+    description:
+        "Street tacos, rice bowls, and quick dinner combinations near Miami nightlife.",
+    imageUrl: "/restaurat2-trip-worth-it.png",
+    hoverImageUrl: "/restaurat2-trip-worth-it.png",
+    hoverVideoUrl: "/taco/rider-choice.mp4",
+    logoUrl: "/restaurat2-trip-worth-it.png",
+    imageAlt:
+        "Fresh tacos and Mexican food in a lively Miami restaurant",
+    offer: "Ask about this week’s rider special.",
+    cta: "Learn More",
+    href: "#magic-city-tacos",
+},
     ],
   },
   {
@@ -364,19 +367,22 @@ const listingSections: ListingSection[] = [
         cta: "Visit",
         href: "#little-havana-walk",
       },
-      {
+{
         slug: "bayfront-weekend-picks",
         name: "Bayfront Weekend Picks",
         category: "Events / Attractions",
         description:
-          "Nearby markets, waterfront events, and low-effort local plans.",
+            "Nearby markets, waterfront events, and easy local plans near Miami’s waterfront.",
         imageUrl: "/Liitle-havan-walk-trip-worth-it.png",
         hoverImageUrl: "/event=trip-worth-it.png",
+        hoverVideoUrl: "/discover/miami.mp4",
         logoUrl: "/Liitle-havan-walk-trip-worth-it.png",
-        imageAlt: "Miami waterfront visitor experience",
-        cta: "Learn More",
+        imageAlt:
+            "Miami waterfront, local markets, and weekend attractions",
+        offer: "Explore this weekend’s waterfront picks.",
+        cta: "Explore",
         href: "#bayfront-weekend-picks",
-      },
+},
     ],
   },
 ];

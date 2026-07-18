@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 
 type MediaItem = {
@@ -19,9 +20,11 @@ export default function BusinessMediaGallery({
   alt: string;
   compact?: boolean;
 }) {
+  const [failedSources, setFailedSources] = useState<string[]>([]);
   const candidates = [primary, secondary].filter(Boolean) as MediaItem[];
   const items = candidates.filter(
     (item, index) =>
+      !failedSources.includes(item.src) &&
       candidates.findIndex(
         (candidate) =>
           candidate.src === item.src && candidate.type === item.type
@@ -32,6 +35,12 @@ export default function BusinessMediaGallery({
   const height = compact
     ? "h-80 sm:h-[390px]"
     : "h-[420px] sm:h-[480px]";
+
+  function markFailed(src: string) {
+    setFailedSources((current) =>
+      current.includes(src) ? current : [...current, src]
+    );
+  }
 
   function renderMedia(item: MediaItem, index: number) {
     if (item.type === "video") {
@@ -45,17 +54,20 @@ export default function BusinessMediaGallery({
           loop
           playsInline
           preload="metadata"
+          onError={() => markFailed(item.src)}
           aria-label={`${alt}${index > 0 ? `, view ${index + 1}` : ""}`}
         />
       );
     }
 
     return (
-      <div
-        className="h-full w-full bg-cover bg-center"
-        style={{ backgroundImage: `url("${item.src}")` }}
-        role="img"
-        aria-label={`${alt}${index > 0 ? `, view ${index + 1}` : ""}`}
+      <Image
+        src={item.src}
+        alt={`${alt}${index > 0 ? `, view ${index + 1}` : ""}`}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+        className="object-cover"
+        onError={() => markFailed(item.src)}
       />
     );
   }

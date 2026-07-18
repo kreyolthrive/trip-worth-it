@@ -75,8 +75,8 @@ export default function MiamiDiscoverySearch() {
   }
 
   return (
-    <div className="mt-8 max-w-3xl rounded-[1.75rem] border border-white/20 bg-slate-950/45 p-3 shadow-2xl backdrop-blur-xl sm:p-4">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
+    <div className="mt-4 max-w-3xl rounded-[1.5rem] border border-white/20 bg-slate-950/45 p-2.5 shadow-2xl backdrop-blur-xl sm:mt-8 sm:rounded-[1.75rem] sm:p-4">
+      <form onSubmit={handleSubmit} className="flex gap-2 sm:gap-3">
         <label className="sr-only" htmlFor="miami-discovery-search">
           Search Miami businesses and experiences
         </label>
@@ -86,24 +86,25 @@ export default function MiamiDiscoverySearch() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Food, barber, mechanic, recovery care…"
-          className="min-h-12 flex-1 rounded-full border border-white/20 bg-white px-5 text-sm font-semibold text-slate-950 outline-none placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/40"
+          className="min-h-11 min-w-0 flex-1 rounded-full border border-white/20 bg-white px-4 text-xs font-semibold text-slate-950 outline-none placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/40 sm:min-h-12 sm:px-5 sm:text-sm"
         />
         <button
           type="submit"
-          className="min-h-12 rounded-full bg-cyan-400 px-6 text-sm font-black text-slate-950 transition hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+          className="min-h-11 rounded-full bg-cyan-400 px-4 text-xs font-black text-slate-950 transition hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-200 sm:min-h-12 sm:px-6 sm:text-sm"
         >
-          Search Miami
+          <span className="sm:hidden">Search</span>
+          <span className="hidden sm:inline">Search Miami</span>
         </button>
       </form>
 
-      <div className="mt-3 flex flex-wrap gap-2" aria-label="Quick filters">
+      <div className="mt-2 flex gap-2 overflow-x-auto pb-1 sm:mt-3 sm:flex-wrap sm:overflow-visible sm:pb-0" aria-label="Quick filters">
         {quickFilters.map((filter) => (
           <button
             key={filter.label}
             type="button"
             aria-pressed={activeFilter === filter.value}
             onClick={() => handleQuickFilter(filter.value)}
-            className={`rounded-full border px-3 py-2 text-xs font-black transition ${
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-black transition sm:py-2 sm:text-xs ${
               activeFilter === filter.value
                 ? "border-cyan-300 bg-cyan-300 text-slate-950"
                 : "border-white/25 bg-white/10 text-white hover:bg-white/20"
@@ -114,7 +115,7 @@ export default function MiamiDiscoverySearch() {
         ))}
       </div>
 
-      <p className="mt-3 px-1 text-xs font-semibold text-white/70" aria-live="polite">
+      <p className="mt-3 hidden px-1 text-xs font-semibold text-white/70 sm:block" aria-live="polite">
         {status}
       </p>
     </div>

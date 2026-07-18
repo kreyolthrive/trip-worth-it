@@ -1,7 +1,6 @@
 import BusinessActionTracker from "@/components/BusinessActionTracker";
 import BusinessMediaGallery from "@/components/BusinessMediaGallery";
 import LocalDiscoveryTracker from "@/components/LocalDiscoveryTracker";
-import MiamiDiscoverySearch from "@/components/MiamiDiscoverySearch";
 import PilotClickTracker from "@/components/PilotClickTracker";
 import PilotPageTracker from "@/components/PilotPageTracker";
 import type { Metadata } from "next";
@@ -100,7 +99,6 @@ const featuredBusinesses: FeaturedBusiness[] = [
     description:
       "Fast screen repairs, battery swaps, and device help while you are on the move.",
     imageUrl: "/Phone-Repair-Trip-worth-it.png",
-    hoverImageUrl: "/Phone-Repair-Trip-worth-it.png",
     logoUrl: "/Phone-Repair-Trip-worth-it.png",
     imageAlt: "Modern phone repair workspace with tools and disassembled phone",
     offer: "Same-day diagnostics available.",
@@ -523,6 +521,20 @@ function MiamiHeroGallery() {
           opacity: 1;
         }
 
+        @media (max-width: 639px) {
+          .miami-hero-slide {
+            display: none;
+            animation: none;
+            opacity: 0;
+            transform: none;
+          }
+
+          .miami-hero-slide:nth-child(2) {
+            display: block;
+            opacity: 1;
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .miami-hero-slide { animation: none; }
           .miami-hero-slide:not(:first-child) { display: none; }
@@ -890,10 +902,10 @@ export default function MiamiPage() {
         </div>
       </header>
 
-      <section className="relative isolate flex min-h-[860px] items-end overflow-hidden bg-slate-950 sm:min-h-[760px] sm:items-center lg:min-h-[calc(100vh-73px)]">
+      <section className="relative isolate flex min-h-[680px] items-end overflow-hidden bg-slate-950 sm:min-h-[760px] sm:items-center lg:min-h-[calc(100vh-73px)]">
         <MiamiHeroGallery />
 
-        <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-56 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-12 pt-72 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
             <div className="max-w-3xl">
               <div className="hidden flex-wrap gap-2 sm:flex">
                 {["Rider-initiated", "Curated", "Local picks", "No app needed"].map(
@@ -917,25 +929,6 @@ export default function MiamiPage() {
                 riders, visitors, and locals moving around Miami.
               </p>
 
-              <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-6 sm:flex sm:gap-3">
-                <TrackingLink
-                  href="#featured"
-                  event="hero_explore_picks"
-                  className="btn-press inline-flex min-h-11 items-center justify-center rounded-full bg-cyan-400 px-3 text-xs font-black text-slate-950 shadow-[0_18px_35px_-20px_rgba(6,182,212,0.9)] hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-slate-950 sm:min-h-12 sm:px-6 sm:text-sm"
-                >
-                  Explore Local Picks
-                </TrackingLink>
-
-                <TrackingLink
-                  href="#categories"
-                  event="hero_browse_categories"
-                  className="btn-press inline-flex min-h-11 items-center justify-center rounded-full border border-white/40 bg-white/15 px-3 text-xs font-black text-white shadow-lg backdrop-blur-md hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-slate-950 sm:min-h-12 sm:px-6 sm:text-sm"
-                >
-                  Browse Categories
-                </TrackingLink>
-              </div>
-
-              <MiamiDiscoverySearch />
             </div>
         </div>
       </section>

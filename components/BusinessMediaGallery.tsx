@@ -33,8 +33,8 @@ export default function BusinessMediaGallery({
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const height = compact
-    ? "h-80 sm:h-[390px]"
-    : "h-[420px] sm:h-[480px]";
+    ? "h-64 sm:h-[390px]"
+    : "h-72 sm:h-[480px]";
 
   function markFailed(src: string) {
     setFailedSources((current) =>
@@ -101,7 +101,7 @@ export default function BusinessMediaGallery({
       </div>
 
       {items.length > 1 ? (
-        <div className="mt-3 flex items-center justify-center gap-2" aria-label="Media gallery position">
+        <div className="mt-3 hidden items-center justify-center gap-2 md:flex" aria-label="Media gallery position">
           {items.map((item, index) => (
             <button
               key={`${item.src}-indicator-${index}`}
@@ -119,9 +119,6 @@ export default function BusinessMediaGallery({
               }`}
             />
           ))}
-          <span className="ml-2 text-[10px] font-black uppercase tracking-[0.14em] text-slate-400 md:hidden">
-            Swipe
-          </span>
         </div>
       ) : null}
 
@@ -136,20 +133,18 @@ export default function BusinessMediaGallery({
 
         @media (hover: none), (pointer: coarse) {
           .business-gallery-track {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            scrollbar-width: none;
+            display: block;
+            overflow: hidden;
           }
-          .business-gallery-track::-webkit-scrollbar { display: none; }
-          .business-gallery-slide,
-          .business-gallery-secondary {
-            position: relative;
-            inset: auto;
-            min-width: 100%;
-            opacity: 1;
-            transform: none;
-            scroll-snap-align: start;
+          .business-gallery-slide {
+            display: none;
+          }
+          .business-gallery-slide:first-child {
+            display: block;
+            position: absolute;
+            inset: 0;
+            opacity: 1 !important;
+            transform: none !important;
           }
         }
 

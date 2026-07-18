@@ -499,8 +499,17 @@ function MiamiHeroGallery() {
         );
       })}
 
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/62 to-slate-950/25" />
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/20" />
+      <div
+        className="miami-hero-mobile-image absolute inset-0 hidden bg-cover bg-center"
+        style={{
+          backgroundImage:
+            "url('/local-discovery/miami/brickell-night.jpg')",
+        }}
+      />
+
+      <div className="absolute inset-0 hidden bg-gradient-to-r from-slate-950/90 via-slate-950/62 to-slate-950/25 sm:block" />
+      <div className="absolute inset-0 hidden bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/20 sm:block" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent sm:hidden" />
 
       <style>{`
         @keyframes miamiHeroFade {
@@ -529,9 +538,8 @@ function MiamiHeroGallery() {
             transform: none;
           }
 
-          .miami-hero-slide:nth-child(2) {
+          .miami-hero-mobile-image {
             display: block;
-            opacity: 1;
           }
         }
 
@@ -902,10 +910,10 @@ export default function MiamiPage() {
         </div>
       </header>
 
-      <section className="relative isolate flex min-h-[680px] items-end overflow-hidden bg-slate-950 sm:min-h-[760px] sm:items-center lg:min-h-[calc(100vh-73px)]">
+      <section className="relative isolate flex min-h-[560px] items-end overflow-hidden bg-slate-950 sm:min-h-[760px] sm:items-center lg:min-h-[calc(100vh-73px)]">
         <MiamiHeroGallery />
 
-        <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-12 pt-72 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-32 sm:px-6 sm:py-24 lg:px-8 lg:py-32">
             <div className="max-w-3xl">
               <div className="hidden flex-wrap gap-2 sm:flex">
                 {["Rider-initiated", "Curated", "Local picks", "No app needed"].map(
@@ -920,7 +928,7 @@ export default function MiamiPage() {
                 )}
               </div>
 
-              <h1 className="text-[2.45rem] font-black leading-[0.94] tracking-[-0.055em] text-white drop-shadow-2xl sm:mt-5 sm:text-6xl lg:text-7xl">
+              <h1 className="text-[2.05rem] font-black leading-[0.96] tracking-[-0.05em] text-white drop-shadow-2xl sm:mt-5 sm:text-6xl lg:text-7xl">
                 Discover Miami while you ride.
               </h1>
 

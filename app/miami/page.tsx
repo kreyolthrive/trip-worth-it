@@ -6,6 +6,7 @@ import PilotPageTracker from "@/components/PilotPageTracker";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense, type ReactNode } from "react";
+import MobileHeroMediaSlider from "@/components/MobileHeroMediaSlider";
 
 type BusinessMedia = {
   slug: string;
@@ -196,22 +197,21 @@ const listingSections: ListingSection[] = [
         cta: "Visit",
         href: "#biscayne-coffee-stop",
       },
-  {
-    slug: "magic-city-tacos",
-    name: "Magic City Tacos",
-    category: "Food & Restaurants",
-    description:
-        "Street tacos, rice bowls, and quick dinner combinations near Miami nightlife.",
-    imageUrl: "/restaurat2-trip-worth-it.png",
-    hoverImageUrl: "/restaurat2-trip-worth-it.png",
-    hoverVideoUrl: "/taco/rider-choice.mp4",
-    logoUrl: "/restaurat2-trip-worth-it.png",
-    imageAlt:
-        "Fresh tacos and Mexican food in a lively Miami restaurant",
-    offer: "Ask about this week’s rider special.",
-    cta: "Learn More",
-    href: "#magic-city-tacos",
-},
+      {
+        slug: "magic-city-tacos",
+        name: "Magic City Tacos",
+        category: "Food & Restaurants",
+        description:
+          "Street tacos, rice bowls, and quick dinner combinations near Miami nightlife.",
+        imageUrl: "/restaurat2-trip-worth-it.png",
+        hoverImageUrl: "/restaurat2-trip-worth-it.png",
+        hoverVideoUrl: "/taco/rider-choice.mp4",
+        logoUrl: "/restaurat2-trip-worth-it.png",
+        imageAlt: "Fresh tacos and Mexican food in a lively Miami restaurant",
+        offer: "Ask about this week’s rider special.",
+        cta: "Learn More",
+        href: "#magic-city-tacos",
+      },
     ],
   },
   {
@@ -367,22 +367,21 @@ const listingSections: ListingSection[] = [
         cta: "Visit",
         href: "#little-havana-walk",
       },
-{
+      {
         slug: "bayfront-weekend-picks",
         name: "Bayfront Weekend Picks",
         category: "Events / Attractions",
         description:
-            "Nearby markets, waterfront events, and easy local plans near Miami’s waterfront.",
+          "Nearby markets, waterfront events, and easy local plans near Miami’s waterfront.",
         imageUrl: "/Liitle-havan-walk-trip-worth-it.png",
         hoverImageUrl: "/event=trip-worth-it.png",
         hoverVideoUrl: "/discover/miami.mp4",
         logoUrl: "/Liitle-havan-walk-trip-worth-it.png",
-        imageAlt:
-            "Miami waterfront, local markets, and weekend attractions",
+        imageAlt: "Miami waterfront, local markets, and weekend attractions",
         offer: "Explore this weekend’s waterfront picks.",
         cta: "Explore",
         href: "#bayfront-weekend-picks",
-},
+      },
     ],
   },
 ];
@@ -439,6 +438,29 @@ const miamiHeroMedia: Array<{
     src: "/local-discovery/miami/miami-food..jpg",
     alt: "Miami local food and late-night dining atmosphere",
     position: "50% 50%",
+  },
+];
+
+const mobileHeroMedia = [
+  {
+    src: "/miami/wynwood.jpg",
+    alt: "Wynwood Miami street art and local discovery",
+    type: "image" as const,
+  },
+  {
+    src: "/miami/brickell-night.jpg.mp4",
+    alt: "Brickell Miami nightlife video",
+    type: "video" as const,
+  },
+  {
+    src: "/miami/brickell-night1.jpg",
+    alt: "Brickell Miami night scene",
+    type: "image" as const,
+  },
+  {
+    src: "/miami/little-havana.jpg",
+    alt: "Little Havana Miami local culture",
+    type: "image" as const,
   },
 ];
 
@@ -505,13 +527,9 @@ function MiamiHeroGallery() {
         );
       })}
 
-      <div
-        className="miami-hero-mobile-image absolute inset-0 hidden bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('/local-discovery/miami/brickell-night.jpg')",
-        }}
-      />
+      <div className="mt-8 md:hidden">
+        <MobileHeroMediaSlider items={mobileHeroMedia} />
+      </div>
 
       <div className="absolute inset-0 hidden bg-gradient-to-r from-slate-950/90 via-slate-950/62 to-slate-950/25 sm:block" />
       <div className="absolute inset-0 hidden bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/20 sm:block" />

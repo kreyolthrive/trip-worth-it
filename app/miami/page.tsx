@@ -6,7 +6,7 @@ import PilotPageTracker from "@/components/PilotPageTracker";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { Suspense, type ReactNode } from "react";
-import MobileHeroMediaSlider from "@/components/MobileHeroMediaSlider";
+import MobileHeroBackground from "@/components/MobileHeroBackground";
 
 type BusinessMedia = {
   slug: string;
@@ -443,22 +443,22 @@ const miamiHeroMedia: Array<{
 
 const mobileHeroMedia = [
   {
-    src: "/miami/wynwood.jpg",
+    src: "/local-discovery/miami/wynwood.jpg",
     alt: "Wynwood Miami street art and local discovery",
     type: "image" as const,
   },
   {
-    src: "/miami/brickell-night.jpg.mp4",
+    src: "/local-discovery/miami/brickell-night.jpg.mp4",
     alt: "Brickell Miami nightlife video",
     type: "video" as const,
   },
   {
-    src: "/miami/brickell-night1.jpg",
+    src: "/local-discovery/miami/brickell-night1.jpg",
     alt: "Brickell Miami night scene",
     type: "image" as const,
   },
   {
-    src: "/miami/little-havana.jpg",
+    src: "/local-discovery/miami/little-havana.jpg",
     alt: "Little Havana Miami local culture",
     type: "image" as const,
   },
@@ -526,10 +526,6 @@ function MiamiHeroGallery() {
           </div>
         );
       })}
-
-      <div className="mt-8 md:hidden">
-        <MobileHeroMediaSlider items={mobileHeroMedia} />
-      </div>
 
       <div className="absolute inset-0 hidden bg-gradient-to-r from-slate-950/90 via-slate-950/62 to-slate-950/25 sm:block" />
       <div className="absolute inset-0 hidden bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/20 sm:block" />
@@ -935,6 +931,7 @@ export default function MiamiPage() {
       </header>
 
       <section className="relative isolate flex min-h-[560px] items-end overflow-hidden bg-slate-950 sm:min-h-[760px] sm:items-center lg:min-h-[calc(100vh-73px)]">
+        <MobileHeroBackground items={mobileHeroMedia} />
         <MiamiHeroGallery />
 
         <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-32 sm:px-6 sm:py-24 lg:px-8 lg:py-32">

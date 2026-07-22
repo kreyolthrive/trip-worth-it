@@ -27,6 +27,10 @@ export default function MobileHeroBackground({
 
   const [activeIndex, setActiveIndex] = useState(0);
 
+  function showNext() {
+    setActiveIndex((current) => (current + 1) % mediaItems.length);
+  }
+
   useEffect(() => {
     if (mediaItems.length <= 1) return;
 
@@ -40,7 +44,7 @@ export default function MobileHeroBackground({
   if (mediaItems.length === 0) return null;
 
   return (
-    <div className="pointer-events-none absolute inset-0 md:hidden">
+    <div className="absolute inset-0 z-10 md:hidden">
       {mediaItems.map((item, index) => {
         const active = index === activeIndex;
         const itemIsVideo = item.type === "video" || isVideo(item.src);
@@ -74,10 +78,17 @@ export default function MobileHeroBackground({
         );
       })}
 
-      <div className="absolute inset-0 bg-slate-950/70" />
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/70 to-slate-950" />
+      <div className="pointer-events-none absolute inset-0 bg-slate-950/70" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/70 to-slate-950" />
 
-      <div className="absolute bottom-6 right-6 flex gap-1.5">
+      <button
+        type="button"
+        onClick={showNext}
+        className="absolute inset-0 z-20 cursor-pointer bg-transparent touch-manipulation"
+        aria-label="Show next Miami hero background"
+      />
+
+      <div className="pointer-events-none absolute bottom-6 right-6 z-30 flex gap-1.5">
         {mediaItems.map((item, index) => (
           <span
             key={`mobile-hero-dot-${item.src}-${index}`}

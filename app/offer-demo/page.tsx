@@ -2,6 +2,17 @@
 
 import { useEffect, useState } from "react";
 
+const demoOffer = {
+  businessName: "Sample Brickell Late-Night Dining Partner",
+  category: "Late-Night Food and Dining",
+  zone: "Brickell",
+  city: "Miami",
+  businessType: "Open Late - Dinner - Drinks",
+  offerTitle: "Free appetizer with purchase of two drinks",
+  offerCode: "RLG-BRICKELL",
+  validMinutes: 30,
+};
+
 function getTime() {
   return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
@@ -45,21 +56,21 @@ export default function OfferDemoPage() {
               </p>
 
               <h1 className="mt-4 text-3xl font-black leading-tight">
-                Late-Night Food and Dining
+                {demoOffer.category}
               </h1>
 
               <p className="mt-2 text-sm font-semibold text-slate-300">
-                Brickell - Open Late - Dinner - Drinks
+                {demoOffer.zone} - {demoOffer.businessType}
               </p>
             </div>
 
             <div className="p-6">
               <p className="text-xs font-black uppercase tracking-[0.18em] text-cyan-700">
-                Sample Brickell Dining Partner
+                {demoOffer.businessName}
               </p>
 
               <h2 className="mt-3 text-2xl font-black">
-                Free appetizer with drink purchase
+                {demoOffer.offerTitle}
               </h2>
 
               <p className="mt-3 text-sm leading-6 text-slate-600">
@@ -67,7 +78,6 @@ export default function OfferDemoPage() {
                 business, claim an offer, and show a live ticket to the merchant.
               </p>
 
-              {/* Added instruction line above button */}
               <p className="mt-6 text-center text-xs font-bold text-slate-500">
                 Tap once to generate a live offer ticket.
               </p>
@@ -84,9 +94,8 @@ export default function OfferDemoPage() {
                 No login. No app download. No passenger data.
               </p>
               
-              {/* Added demo disclaimer */}
               <p className="mt-3 text-center text-[10px] font-semibold text-slate-400">
-                Demo only. Final offers require business approval.
+                Demo only. Valid for {demoOffer.validMinutes} minutes after claim. Final offers require business approval.
               </p>
             </div>
           </section>
@@ -100,7 +109,7 @@ export default function OfferDemoPage() {
                   </p>
 
                   <h1 className="mt-3 text-2xl font-black">
-                    Sample Brickell Dining Partner
+                    {demoOffer.businessName}
                   </h1>
                 </div>
 
@@ -118,7 +127,7 @@ export default function OfferDemoPage() {
                 </p>
 
                 <p className="mt-2 text-3xl font-black tracking-tight">
-                  RLG-BRICKELL
+                  {demoOffer.offerCode}
                 </p>
               </div>
 
@@ -150,7 +159,7 @@ export default function OfferDemoPage() {
                 </p>
 
                 <p className="mt-2 text-xs font-semibold text-cyan-100/80">
-                  Demo only. Final offers require business approval.
+                  Demo only. Valid for {demoOffer.validMinutes} minutes after claim. Final offers require business approval.
                 </p>
               </div>
 

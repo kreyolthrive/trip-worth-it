@@ -44,3 +44,7 @@ yarn-error.log*
 next-env.d.ts
 .env.local
 .env
+.playwright-mcp/
+backups/
+data/beta-signups.json
+data/local-discovery-leads.json

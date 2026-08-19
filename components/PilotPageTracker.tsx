@@ -16,24 +16,33 @@ export default function PilotPageTracker({
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const driverSlug = searchParams.get("driver") || "";
+    // Read values from searchParams, not the object itself
+    const driverSlug = searchParams?.get("driver") ?? "";
+    const utmSource = searchParams?.get("utm_source") ?? "";
+    const utmMedium = searchParams?.get("utm_medium") ?? "";
+    const utmCampaign = searchParams?.get("utm_campaign") ?? "";
+
+    // Only send tracking after router + params are available
+    if (!pathname) return;
+
+    const payload = {
+      eventType,
+      driverSlug,
+      neighborhood,
+      pagePath: pathname,
+      metadata: {
+        utm_source: utmSource,
+        utm_medium: utmMedium,
+        utm_campaign: utmCampaign,
+      },
+    };
 
     fetch("/api/pilot-events", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        eventType,
-        driverSlug,
-        neighborhood,
-        pagePath: pathname,
-        metadata: {
-          utm_source: searchParams.get("utm_source") || "",
-          utm_medium: searchParams.get("utm_medium") || "",
-          utm_campaign: searchParams.get("utm_campaign") || "",
-        },
-      }),
+      body: JSON.stringify(payload),
     }).catch(() => {
       // Tracking should never break the page.
     });

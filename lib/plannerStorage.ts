@@ -1,4 +1,11 @@
 import { GoalPlannerInput, IncomeTargetInput, ReservePlannerInput } from "@/types/planner";
+import {
+  hasSavedDriverProfile,
+  loadDriverProfile,
+  profileToGoalInput,
+  profileToIncomeTargetInput,
+  profileToReserveInput,
+} from "@/lib/profile";
 
 const KEYS = {
   reserve: "trip-worth-it-reserve-planner",
@@ -57,21 +64,30 @@ function safeSave(key: string, value: unknown): void {
 }
 
 export function loadReservePlannerInput(): ReservePlannerInput {
-  return safeLoad(KEYS.reserve, DEFAULT_RESERVE_INPUT);
+  const fallback = hasSavedDriverProfile()
+    ? profileToReserveInput(loadDriverProfile())
+    : DEFAULT_RESERVE_INPUT;
+  return safeLoad(KEYS.reserve, fallback);
 }
 export function saveReservePlannerInput(value: ReservePlannerInput): void {
   safeSave(KEYS.reserve, value);
 }
 
 export function loadIncomeTargetInput(): IncomeTargetInput {
-  return safeLoad(KEYS.incomeTarget, DEFAULT_INCOME_TARGET_INPUT);
+  const fallback = hasSavedDriverProfile()
+    ? profileToIncomeTargetInput(loadDriverProfile())
+    : DEFAULT_INCOME_TARGET_INPUT;
+  return safeLoad(KEYS.incomeTarget, fallback);
 }
 export function saveIncomeTargetInput(value: IncomeTargetInput): void {
   safeSave(KEYS.incomeTarget, value);
 }
 
 export function loadGoalPlannerInput(): GoalPlannerInput {
-  return safeLoad(KEYS.goalPlanner, DEFAULT_GOAL_INPUT);
+  const fallback = hasSavedDriverProfile()
+    ? profileToGoalInput(loadDriverProfile())
+    : DEFAULT_GOAL_INPUT;
+  return safeLoad(KEYS.goalPlanner, fallback);
 }
 export function saveGoalPlannerInput(value: GoalPlannerInput): void {
   safeSave(KEYS.goalPlanner, value);

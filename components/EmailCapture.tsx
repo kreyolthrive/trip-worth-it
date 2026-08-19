@@ -4,7 +4,7 @@ import { FormEvent, useMemo, useState } from "react";
 import { MailIcon } from "@/components/ui/Icons";
 
 interface EmailCaptureProps {
-  onSubmitEmail: (email: string) => void;
+  onSubmitEmail: (email: string) => Promise<void>;
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,16 +13,28 @@ export default function EmailCapture({ onSubmitEmail }: EmailCaptureProps) {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [attempted, setAttempted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const isValid = useMemo(() => EMAIL_REGEX.test(email.trim()), [email]);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setAttempted(true);
+    setSubmitError(null);
     if (!isValid) return;
-    onSubmitEmail(email.trim());
-    setSubmitted(true);
-    setEmail("");
+    try {
+      setIsSubmitting(true);
+      await onSubmitEmail(email.trim());
+      setSubmitted(true);
+      setEmail("");
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Could not save your beta signup."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -68,9 +80,10 @@ export default function EmailCapture({ onSubmitEmail }: EmailCaptureProps) {
           />
           <button
             type="submit"
+            disabled={isSubmitting}
             className="btn-press h-11 rounded-xl bg-slate-900 px-4 text-[13px] font-bold text-white shadow-[0_2px_8px_rgba(15,23,42,0.3)] transition hover:bg-slate-800"
           >
-            Join
+            {isSubmitting ? "Saving..." : "Join"}
           </button>
         </div>
 
@@ -78,6 +91,8 @@ export default function EmailCapture({ onSubmitEmail }: EmailCaptureProps) {
           <p className="mt-2 text-[12px] font-medium text-rose-600">
             Enter a valid email address.
           </p>
+        ) : submitError ? (
+          <p className="mt-2 text-[12px] font-medium text-rose-600">{submitError}</p>
         ) : null}
       </form>
     </section>

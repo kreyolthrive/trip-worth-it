@@ -9,11 +9,13 @@ import {
   TargetIcon,
   XCircleIcon,
 } from "@/components/ui/Icons";
+import { smartVerdictCopy, weeklyMeaningCopy, WeeklyMeaningContext } from "@/lib/smartVerdict";
 import { DriverDefaults, TripResult } from "@/types/trip";
 
 interface ResultsCardProps {
   result: TripResult | null;
   assumptions: DriverDefaults;
+  weeklyContext: WeeklyMeaningContext;
 }
 
 function fmt(value: number) {
@@ -84,31 +86,13 @@ function verdictConfig(verdict: TripResult["verdict"]) {
 function verdictSubtitle(verdict: TripResult["verdict"]) {
   switch (verdict) {
     case "WORTH_TAKING":
-      return "Clears your cost and time targets with room to spare.";
+      return "This offer clears your targets and looks worth taking.";
     case "BORDERLINE":
-      return "Close to your floor — inspect before deciding.";
+      return "This may only make sense if it helps your direction or weekly target.";
     case "NOT_WORTH_IT":
-      return "After costs, this offer likely drags down your shift average.";
+      return "This trip looks weak for profit after time, distance, and costs.";
     default:
       return "";
-  }
-}
-
-function recommendation(result: TripResult, driver: DriverDefaults) {
-  const netHr = fmt(result.metrics.netPerHour);
-  const tgtHr = fmt(driver.minNetPerHour);
-  const netMi = fmt(result.metrics.netPerMile);
-  const tgtMi = fmt(driver.minNetPerMile);
-
-  switch (result.verdict) {
-    case "WORTH_TAKING":
-      return `${netHr}/hr and ${netMi}/mi clear your targets. Take it unless you see unusual traffic, detours, or a weak drop-off zone.`;
-    case "BORDERLINE":
-      return `This sits near your floor (${tgtHr}/hr, ${tgtMi}/mi). Take it if demand is slow, the drop positions you well, or you need to stay active.`;
-    case "NOT_WORTH_IT":
-      return `The trip misses your targets at ${netHr}/hr and ${netMi}/mi vs. your goals of ${tgtHr}/hr and ${tgtMi}/mi. Skip unless there is a strong positioning reason.`;
-    default:
-      return "Review the details before deciding.";
   }
 }
 
@@ -147,8 +131,8 @@ function EmptyState() {
             Your verdict will appear here
           </p>
           <p className="mx-auto mt-2 max-w-xs text-[13px] leading-5 text-slate-500">
-            Fill in the trip details on the left and hit{" "}
-            <span className="font-semibold text-slate-700">Get Trip Verdict</span>.
+            Upload a trip screenshot or fill in the trip details. The result shows net pay,
+            net per hour, and what the offer means for your week.
           </p>
         </div>
 
@@ -156,7 +140,7 @@ function EmptyState() {
           {[
             "Estimated net earnings after operating costs",
             "Net per mile and net per hour vs. your targets",
-            "A concise recommendation you can act on immediately",
+            "Smart Verdict copy plus weekly and reserve context",
           ].map((item) => (
             <li key={item} className="flex items-start gap-2.5 text-[13px] text-slate-600">
               <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400" />
@@ -171,10 +155,11 @@ function EmptyState() {
 
 // ─── Result state ─────────────────────────────────────────────────────────────
 
-export default function ResultsCard({ result, assumptions }: ResultsCardProps) {
+export default function ResultsCard({ result, assumptions, weeklyContext }: ResultsCardProps) {
   if (!result) return <EmptyState />;
 
   const cfg = verdictConfig(result.verdict);
+  const weeklyMeaning = weeklyMeaningCopy(result, weeklyContext);
 
   const metrics = [
     { label: "Net / Mile", value: fmt(result.metrics.netPerMile), icon: <RouteIcon className="h-3.5 w-3.5" /> },
@@ -250,11 +235,27 @@ export default function ResultsCard({ result, assumptions }: ResultsCardProps) {
       <div className={`mx-6 mt-5 rounded-xl border p-4 sm:mx-7 ${cfg.recBg}`}>
         <p className={`mb-1.5 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest ${cfg.recLabel}`}>
           <TargetIcon className="h-3.5 w-3.5" />
-          Recommendation
+          Smart Verdict
         </p>
         <p className="text-[14px] leading-6 text-slate-700">
-          {recommendation(result, assumptions)}
+          {smartVerdictCopy(result, assumptions)}
         </p>
+      </div>
+
+      {/* Weekly meaning */}
+      <div className="mx-6 mt-3 rounded-xl border border-cyan-100 bg-cyan-50 p-4 sm:mx-7">
+        <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-cyan-700">
+          <TargetIcon className="h-3.5 w-3.5" />
+          What This Means For Your Week
+        </p>
+        <ul className="space-y-2">
+          {weeklyMeaning.map((line) => (
+            <li key={line} className="flex items-start gap-2 text-[13px] leading-5 text-slate-700">
+              <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-cyan-500" />
+              {line}
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Metrics grid */}

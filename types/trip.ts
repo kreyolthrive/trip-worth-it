@@ -45,6 +45,28 @@ export interface TripResult {
   metrics: TripMetrics;
 }
 
+export type ExtractionConfidence = "high" | "medium" | "low";
+
+export interface TripScreenshotExtraction {
+  payout: number | null;
+  pickupDistanceMiles: number | null;
+  tripDistanceMiles: number | null;
+  estimatedTimeMinutes: number | null;
+  destinationCue: string | null;
+  confidence: ExtractionConfidence;
+  missingFields: string[];
+  warnings: string[];
+  rawSummary: string;
+}
+
+export interface TripScreenshotExtractionResponse {
+  extraction: TripScreenshotExtraction;
+  mode?: "openai" | "demo";
+  demoScenario?: DemoTripScenario;
+}
+
+export type DemoTripScenario = "weak-short-delivery" | "steady-mid-distance";
+
 export interface RecentTripCheck {
   id: string;
   createdAt: string;
@@ -55,6 +77,18 @@ export interface RecentTripCheck {
 }
 
 export interface BetaSignup {
+  name: string;
   email: string;
-  submittedAt: string;
+  primaryPlatform: "Uber" | "Lyft" | "Uber Eats" | "DoorDash" | "Multi-app";
+  drivingCommitment: "Full-time" | "Part-time" | "Side income / occasional";
+  frustration?: string;
+  createdAt: string;
+  source?: string;
+  landingPath?: string;
+  referrer?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
+  utmTerm?: string;
 }

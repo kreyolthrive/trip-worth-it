@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BucketsIcon, DashboardIcon, GaugeIcon, TargetIcon } from "@/components/ui/Icons";
+import {
+  BucketsIcon,
+  DashboardIcon,
+  GaugeIcon,
+  ProfileIcon,
+  TargetIcon,
+} from "@/components/ui/Icons";
 
 const LINKS = [
   {
@@ -29,13 +35,19 @@ const LINKS = [
     sub: "Your week at a glance",
     Icon: DashboardIcon,
   },
+  {
+    href: "/profile",
+    label: "Profile",
+    sub: "Your driver baseline",
+    Icon: ProfileIcon,
+  },
 ];
 
 export default function AppNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="mb-5 grid grid-cols-2 gap-1.5 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm sm:flex">
+    <nav className="mb-5 grid grid-cols-2 gap-1.5 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-sm sm:grid-cols-3 lg:flex">
       {LINKS.map(({ href, label, sub, Icon }) => {
         const active = pathname === href;
         return (

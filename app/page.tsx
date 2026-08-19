@@ -6,16 +6,20 @@ import DriverDefaultsForm from "@/components/DriverDefaultsForm";
 import EmailCapture from "@/components/EmailCapture";
 import RecentChecks from "@/components/RecentChecks";
 import ResultsCard from "@/components/ResultsCard";
+import ScreenshotTripAssistant from "@/components/ScreenshotTripAssistant";
 import TripInputForm from "@/components/TripInputForm";
+import { submitBetaSignup } from "@/lib/betaSignupClient";
 import { calculateTripMetrics } from "@/lib/calculator";
 import { DEFAULT_DRIVER_DEFAULTS } from "@/lib/defaults";
+import { loadBucketsInput } from "@/lib/bucketsStorage";
 import {
-  appendBetaSignup,
-  loadDriverDefaults,
-  loadRecentTripChecks,
-  prependRecentTripCheck,
-  saveDriverDefaults,
-} from "@/lib/storage";
+  DEFAULT_INCOME_TARGET_INPUT,
+  DEFAULT_RESERVE_INPUT,
+  loadIncomeTargetInput,
+  loadReservePlannerInput,
+} from "@/lib/plannerStorage";
+import { loadDriverDefaults, loadRecentTripChecks, prependRecentTripCheck, saveDriverDefaults } from "@/lib/storage";
+import { WeeklyMeaningContext } from "@/lib/smartVerdict";
 import { isDriverDefaultsValid, isTripInputValid } from "@/lib/validation";
 import { evaluateTrip } from "@/lib/verdict";
 import { DriverDefaults, RecentTripCheck, TripInput, TripResult } from "@/types/trip";
@@ -47,6 +51,11 @@ export default function HomePage() {
   const [recentChecks, setRecentChecks] = useState<RecentTripCheck[]>(() =>
     loadRecentTripChecks()
   );
+  const [weeklyContext] = useState<WeeklyMeaningContext>(() => ({
+    reserve: loadReservePlannerInput() || DEFAULT_RESERVE_INPUT,
+    incomeTarget: loadIncomeTargetInput() || DEFAULT_INCOME_TARGET_INPUT,
+    buckets: loadBucketsInput(),
+  }));
   const [loadedRecentCheck, setLoadedRecentCheck] = useState<RecentTripCheck | null>(null);
 
   const handleDefaultsChange = (next: DriverDefaults) => {
@@ -97,6 +106,18 @@ export default function HomePage() {
 
   const handleCalculate = () => runCalculation(trip);
 
+  const handleApplyExtractedTrip = (next: TripInput) => {
+    setTrip(next);
+    setResult(null);
+    setLoadedRecentCheck(null);
+  };
+
+  const handleConfirmExtractedTrip = (next: TripInput) => {
+    setTrip(next);
+    setLoadedRecentCheck(null);
+    runCalculation(next);
+  };
+
   const handleLoadRecent = (check: RecentTripCheck) => {
     setTrip(check.trip);
     setLoadedRecentCheck(check);
@@ -108,8 +129,16 @@ export default function HomePage() {
     runCalculation(loadedRecentCheck.trip);
   };
 
-  const handleEmailSubmit = (email: string) => {
-    appendBetaSignup({ email, submittedAt: new Date().toISOString() });
+  const handleEmailSubmit = async (email: string) => {
+    await submitBetaSignup({
+      name: "Homepage signup",
+      email,
+      primaryPlatform: "Multi-app",
+      drivingCommitment: "Part-time",
+      createdAt: new Date().toISOString(),
+      source: "homepage_email_capture",
+      landingPath: "/",
+    });
   };
 
   return (
@@ -183,6 +212,12 @@ export default function HomePage() {
         <div className="grid grid-cols-1 items-start gap-5 lg:gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(420px,420px)]">
           {/* Left column: inputs */}
           <div className="space-y-4">
+            <ScreenshotTripAssistant
+              onApplyToForm={handleApplyExtractedTrip}
+              onConfirm={handleConfirmExtractedTrip}
+              disabled={!isDriverDefaultsValid(driverDefaults)}
+            />
+
             <TripInputForm
               value={trip}
               onChange={handleTripChange}
@@ -203,7 +238,11 @@ export default function HomePage() {
 
           {/* Right column: results (sticky on large screens) */}
           <div className="space-y-4 xl:sticky xl:top-6 xl:self-start">
-            <ResultsCard result={result} assumptions={driverDefaults} />
+            <ResultsCard
+              result={result}
+              assumptions={driverDefaults}
+              weeklyContext={weeklyContext}
+            />
             <RecentChecks items={recentChecks} onLoad={handleLoadRecent} />
             {result ? <EmailCapture onSubmitEmail={handleEmailSubmit} /> : null}
           </div>

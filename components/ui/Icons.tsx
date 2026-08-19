@@ -154,3 +154,13 @@ export function DashboardIcon(props: IconProps) {
     </BaseIcon>
   );
 }
+
+export function ProfileIcon(props: IconProps) {
+  return (
+    <BaseIcon {...props}>
+      <circle cx="12" cy="8" r="3.2" />
+      <path d="M5.5 20a6.5 6.5 0 0113 0" />
+      <path d="M18.5 5.5l1 1 2-2" />
+    </BaseIcon>
+  );
+}

@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_DRIVER_DEFAULTS } from "./defaults";
 import {
   RECENT_TRIP_CHECKS_LIMIT,
-  appendBetaSignup,
   loadDriverDefaults,
   loadRecentTripChecks,
   prependRecentTripCheck,
@@ -126,16 +125,5 @@ describe("storage", () => {
     expect(merged[0].id).toBe("first");
     expect(merged[0].estimatedNet).toBe(12);
     expect(merged[0].verdict).toBe("NOT_WORTH_IT");
-  });
-
-  it("dedupes beta signups by email case-insensitively", () => {
-    appendBetaSignup({ email: "driver@example.com", submittedAt: new Date().toISOString() });
-    const next = appendBetaSignup({
-      email: "DRIVER@example.com",
-      submittedAt: new Date().toISOString(),
-    });
-
-    expect(next).toHaveLength(1);
-    expect(next[0].email).toBe("driver@example.com");
   });
 });

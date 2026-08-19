@@ -16,6 +16,11 @@ export const metadata: Metadata = {
   title: "Trip Worth-It — Driver Decision Tool",
   description:
     "Check whether a rideshare or delivery trip is worth accepting. Compare net earnings against your own cost and time targets before every trip.",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({

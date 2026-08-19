@@ -1,9 +1,9 @@
-import { BetaSignup, DriverDefaults, RecentTripCheck, TripInput } from "@/types/trip";
+import { DriverDefaults, RecentTripCheck, TripInput } from "@/types/trip";
 import { DEFAULT_DRIVER_DEFAULTS } from "./defaults";
+import { hasSavedDriverProfile, loadDriverProfile, profileToDriverDefaults } from "./profile";
 
 const DRIVER_DEFAULTS_KEY = "trip-worth-it-driver-defaults";
 const RECENT_TRIP_CHECKS_KEY = "trip-worth-it-recent-trip-checks";
-const BETA_SIGNUPS_KEY = "trip-worth-it-beta-signups";
 export const RECENT_TRIP_CHECKS_LIMIT = 5;
 export const RECENT_TRIP_MERGE_WINDOW_MS = 10 * 60 * 1000;
 
@@ -12,6 +12,9 @@ export function loadDriverDefaults(): DriverDefaults {
 
   try {
     const raw = window.localStorage.getItem(DRIVER_DEFAULTS_KEY);
+    if (!raw && hasSavedDriverProfile()) {
+      return profileToDriverDefaults(loadDriverProfile());
+    }
     if (!raw) return DEFAULT_DRIVER_DEFAULTS;
     return { ...DEFAULT_DRIVER_DEFAULTS, ...JSON.parse(raw) };
   } catch {
@@ -92,20 +95,6 @@ export function prependRecentTripCheck(check: RecentTripCheck) {
   return next;
 }
 
-export function loadBetaSignups(): BetaSignup[] {
-  if (typeof window === "undefined") return [];
-
-  try {
-    const raw = window.localStorage.getItem(BETA_SIGNUPS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed as BetaSignup[];
-  } catch {
-    return [];
-  }
-}
-
 export interface RecentCheckStats {
   count: number;
   avgNetPerTrip: number;
@@ -126,19 +115,4 @@ export function computeRecentCheckStats(): RecentCheckStats | null {
     worthTakingCount: worthTaking,
     worthTakingPct: Math.round((worthTaking / checks.length) * 100),
   };
-}
-
-export function appendBetaSignup(signup: BetaSignup) {
-  const existing = loadBetaSignups();
-  const isDuplicate = existing.some(
-    (entry) => entry.email.toLowerCase() === signup.email.toLowerCase()
-  );
-
-  const next = isDuplicate ? existing : [signup, ...existing];
-
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(BETA_SIGNUPS_KEY, JSON.stringify(next));
-  }
-
-  return next;
 }

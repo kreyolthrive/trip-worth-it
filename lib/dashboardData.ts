@@ -8,6 +8,11 @@ import {
 import { loadBucketsInput } from "./bucketsStorage";
 import { calculateReserves, calculateIncomeTarget, calculateGoal } from "./planner";
 import { calculateBuckets } from "./buckets";
+import {
+  getProfileSetupStatus,
+  hasSavedDriverProfile,
+  loadDriverProfile,
+} from "./profile";
 import type { RecentTripCheck } from "@/types/trip";
 import type {
   ReservePlannerInput,
@@ -18,8 +23,14 @@ import type {
   GoalPlannerResult,
 } from "@/types/planner";
 import type { BucketsInput, BucketsResult } from "@/types/buckets";
+import type { DriverProfile, ProfileSetupStatus } from "@/types/profile";
 
 export interface DashboardSnapshot {
+  // Profile
+  profile: DriverProfile;
+  hasProfile: boolean;
+  profileSetup: ProfileSetupStatus;
+
   // Trips
   lastTrip: RecentTripCheck | null;
   tripStats: RecentCheckStats | null;
@@ -54,6 +65,10 @@ export interface DashboardSnapshot {
 }
 
 export function loadDashboardSnapshot(): DashboardSnapshot {
+  const profile = loadDriverProfile();
+  const hasProfile = hasSavedDriverProfile();
+  const profileSetup = getProfileSetupStatus(profile, hasProfile);
+
   const trips = loadRecentTripChecks();
   const lastTrip = trips[0] ?? null;
   const tripStats = computeRecentCheckStats();
@@ -96,16 +111,25 @@ export function loadDashboardSnapshot(): DashboardSnapshot {
   const dashboardWeeklyGap =
     hasIncomeTarget && incomeTargetResult.weeklyTarget > 0
       ? effectiveWeeklyIncome - incomeTargetResult.weeklyTarget
+      : hasProfile && profile.weeklyIncomeTarget > 0
+      ? effectiveWeeklyIncome - profile.weeklyIncomeTarget
       : 0;
   const dashboardOnTrack = dashboardWeeklyGap >= 0;
 
   const nudges: string[] = [];
 
   if (!hasTripData && !hasReservePlanner && !hasBuckets) {
+    if (profileSetup.percent < 100) {
+      nudges.push(profileSetup.nextAction);
+    }
     nudges.push(
       "Check a few trips and set up your planner to get personalized weekly guidance."
     );
   } else {
+    if (profileSetup.percent < 100) {
+      nudges.push(profileSetup.nextAction);
+    }
+
     if (tripStats && tripStats.worthTakingPct < 50 && trips.length >= 2) {
       nudges.push(
         `${100 - tripStats.worthTakingPct}% of your recent trip checks were borderline or not worth it. Consider reviewing your minimum targets.`
@@ -119,8 +143,7 @@ export function loadDashboardSnapshot(): DashboardSnapshot {
     }
 
     if (
-      hasIncomeTarget &&
-      incomeTargetResult.weeklyTarget > 0 &&
+      (hasIncomeTarget || (hasProfile && profile.weeklyIncomeTarget > 0)) &&
       effectiveWeeklyIncome > 0 &&
       !dashboardOnTrack
     ) {
@@ -152,6 +175,14 @@ export function loadDashboardSnapshot(): DashboardSnapshot {
       );
     }
 
+    if (!hasTripData) {
+      nudges.push("Run a Trip Check or demo screenshot so your dashboard can show recent offer quality.");
+    }
+
+    if (!hasGoal && profileSetup.percent >= 80) {
+      nudges.push("Add a primary goal when you want the dashboard to track progress beyond weekly income.");
+    }
+
     if (hasBuckets && bucketsResult.isOverAllocated) {
       nudges.push(
         "Your savings bucket allocations exceed 100%. Adjust your percentages in Savings Buckets."
@@ -160,6 +191,9 @@ export function loadDashboardSnapshot(): DashboardSnapshot {
   }
 
   return {
+    profile,
+    hasProfile,
+    profileSetup,
     lastTrip,
     tripStats,
     hasTripData,

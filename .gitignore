@@ -48,3 +48,5 @@ next-env.d.ts
 backups/
 data/beta-signups.json
 data/local-discovery-leads.json
+supabase/.temp/
+supabase/failed-migration-artifacts/

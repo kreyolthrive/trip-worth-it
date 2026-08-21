@@ -121,12 +121,34 @@ export default function BusinessActionTracker() {
         },
         body: JSON.stringify(payload),
         keepalive: true,
-      }).catch((error) => {
-        console.error(
-          "[business-action-tracker]",
-          error
-        );
-      });
+      })
+        .then(async (response) => {
+          if (!response.ok) return;
+
+          const result = (await response.json()) as {
+            attributionToken?: string | null;
+          };
+
+          if (
+            payload.businessSlug &&
+            result.attributionToken
+          ) {
+            try {
+              window.localStorage.setItem(
+                `rlg_attribution_token:${payload.businessSlug}`,
+                result.attributionToken
+              );
+            } catch {
+              // Server-side session attribution remains available.
+            }
+          }
+        })
+        .catch((error) => {
+          console.error(
+            "[business-action-tracker]",
+            error
+          );
+        });
     }
 
     document.addEventListener(

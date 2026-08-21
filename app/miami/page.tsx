@@ -388,6 +388,7 @@ const listingSections: ListingSection[] = [
 
 const leadTargets = listingSections.flatMap((section) =>
   section.listings.map((listing) => ({
+    businessSlug: listing.slug,
     businessName: listing.name,
     category: section.title,
   }))
@@ -780,6 +781,7 @@ function FeaturedCard({ business }: { business: FeaturedBusiness }) {
           <a
             href="#request-info"
             data-lead-business={business.name}
+            data-lead-business-slug={business.slug}
             data-lead-category={business.category}
             data-track-event="lead_intent"
             data-track-category={business.category}
@@ -853,6 +855,7 @@ function ListingCard({
         <a
           href="#request-info"
           data-lead-business={listing.name}
+          data-lead-business-slug={listing.slug}
           data-lead-category={section.title}
           data-track-event="lead_intent"
           data-track-category={section.title}

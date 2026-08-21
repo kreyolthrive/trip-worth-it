@@ -41,6 +41,13 @@ type QualifiedLeadResult = {
   replayed: boolean;
 };
 
+type MonetizationCaptureResult = {
+  event_id: string | null;
+  event_status: string;
+  decision_code: string;
+  replayed: boolean;
+};
+
 function jsonError(message: string, status = 400) {
   return Response.json(
     {
@@ -141,12 +148,19 @@ async function fetchBusiness(
   );
 
   if (!response.ok) {
+    const details = await response
+      .text()
+      .catch(() => "");
+
     console.error(
       "[qualified-lead:business-lookup]",
-      await response.text()
+      response.status,
+      details
     );
 
-    return null;
+    throw new Error(
+      "RLG business lookup failed"
+    );
   }
 
   const rows = (await response.json()) as BusinessRow[];
@@ -174,12 +188,19 @@ async function fetchDriver(
   );
 
   if (!response.ok) {
+    const details = await response
+      .text()
+      .catch(() => "");
+
     console.error(
       "[qualified-lead:driver-lookup]",
-      await response.text()
+      response.status,
+      details
     );
 
-    return null;
+    throw new Error(
+      "RLG driver lookup failed"
+    );
   }
 
   const rows = (await response.json()) as DriverRow[];
@@ -366,6 +387,92 @@ export async function POST(request: Request) {
       return jsonError(
         "Your request could not be confirmed.",
         500
+      );
+    }
+
+    /*
+     * Lead persistence is the customer-facing transaction boundary.
+     *
+     * Monetization capture happens only AFTER the durable lead RPC
+     * succeeds. Accounting failure must never roll back or disguise
+     * a legitimate rider request.
+     *
+     * The capture RPC is idempotent, so failed/missing events can
+     * also be reconciled safely later.
+     */
+    try {
+      const captureResponse = await fetch(
+        `${supabaseUrl}/rest/v1/rpc/rlg_capture_qualified_lead_monetization_event`,
+        {
+          method: "POST",
+          headers: getHeaders(serviceRoleKey),
+          body: JSON.stringify({
+            p_lead_id: result.lead_id,
+          }),
+          cache: "no-store",
+        }
+      );
+
+      if (!captureResponse.ok) {
+        const details = await captureResponse
+          .text()
+          .catch(() => "");
+
+        console.error(
+          "[qualified-lead:monetization-capture]",
+          captureResponse.status,
+          details
+        );
+      } else {
+        const captureRows =
+          (await captureResponse.json()) as
+            MonetizationCaptureResult[];
+
+        const captureResult = captureRows[0];
+
+        /*
+         * Only a pending billable event needs processing.
+         *
+         * - skipped: no accounting should be created
+         * - processed: replay; accounting already exists
+         * - pending: create transaction + ledger entries
+         *
+         * Processing remains best-effort. Any failure here occurs
+         * after the durable rider lead was successfully stored.
+         */
+        if (
+          captureResult?.event_id &&
+          captureResult.event_status === "pending"
+        ) {
+          const processResponse = await fetch(
+            `${supabaseUrl}/rest/v1/rpc/rlg_process_monetization_event`,
+            {
+              method: "POST",
+              headers: getHeaders(serviceRoleKey),
+              body: JSON.stringify({
+                p_event_id: captureResult.event_id,
+              }),
+              cache: "no-store",
+            }
+          );
+
+          if (!processResponse.ok) {
+            const details = await processResponse
+              .text()
+              .catch(() => "");
+
+            console.error(
+              "[qualified-lead:monetization-process]",
+              processResponse.status,
+              details
+            );
+          }
+        }
+      }
+    } catch (captureError) {
+      console.error(
+        "[qualified-lead:monetization]",
+        captureError
       );
     }
 

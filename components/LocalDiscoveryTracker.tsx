@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 type LeadTarget = {
+  businessSlug: string;
   businessName: string;
   category: string;
 };
@@ -60,8 +61,16 @@ export default function LocalDiscoveryTracker({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const visitorSessionIdRef = useRef("");
-  const [selectedBusiness, setSelectedBusiness] = useState(leadTargets[0]?.businessName || "");
-  const [selectedCategory, setSelectedCategory] = useState(leadTargets[0]?.category || "");
+  const submissionTokenRef = useRef("");
+
+  const [selectedBusinessSlug, setSelectedBusinessSlug] =
+    useState(leadTargets[0]?.businessSlug || "");
+
+  const [selectedBusiness, setSelectedBusiness] =
+    useState(leadTargets[0]?.businessName || "");
+
+  const [selectedCategory, setSelectedCategory] =
+    useState(leadTargets[0]?.category || "");
   const [submitStatus, setSubmitStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -73,9 +82,8 @@ export default function LocalDiscoveryTracker({
   const leadOptions = useMemo(
     () =>
       leadTargets.map((target) => ({
-        value: `${target.businessName}|||${target.category}`,
+        value: target.businessSlug,
         label: target.businessName,
-        category: target.category,
       })),
     [leadTargets]
   );
@@ -154,18 +162,35 @@ export default function LocalDiscoveryTracker({
       const leadElement = target.closest<HTMLElement>("[data-lead-business]");
       if (!leadElement) return;
 
-      setSelectedBusiness(leadElement.dataset.leadBusiness || "");
-      setSelectedCategory(leadElement.dataset.leadCategory || "");
+      setSelectedBusinessSlug(
+        leadElement.dataset.leadBusinessSlug ||
+          leadElement.dataset.businessSlug ||
+          ""
+      );
+
+      setSelectedBusiness(
+        leadElement.dataset.leadBusiness || ""
+      );
+
+      setSelectedCategory(
+        leadElement.dataset.leadCategory || ""
+      );
     };
 
     document.addEventListener("click", handleLeadTrigger);
     return () => document.removeEventListener("click", handleLeadTrigger);
   }, []);
 
-  const handleBusinessSelect = (value: string) => {
-    const [businessName, category] = value.split("|||");
-    setSelectedBusiness(businessName || "");
-    setSelectedCategory(category || "");
+  const handleBusinessSelect = (businessSlug: string) => {
+    const target = leadTargets.find(
+      (entry) => entry.businessSlug === businessSlug
+    );
+
+    if (!target) return;
+
+    setSelectedBusinessSlug(target.businessSlug);
+    setSelectedBusiness(target.businessName);
+    setSelectedCategory(target.category);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -179,7 +204,23 @@ export default function LocalDiscoveryTracker({
     visitorSessionIdRef.current = sessionId;
 
     try {
+const submissionToken =
+  submissionTokenRef.current ||
+  crypto.randomUUID();
+
+submissionTokenRef.current = submissionToken;
+
+const attributionToken =
+  selectedBusinessSlug
+    ? window.localStorage.getItem(
+        `rlg_attribution_token:${selectedBusinessSlug}`
+      )
+    : null;
+
 await postJson("/api/local-discovery/leads", {
+  submission_token: submissionToken,
+  attribution_token: attributionToken,
+  business_slug: selectedBusinessSlug,
   business_name: selectedBusiness,
   category: selectedCategory,
   customer_name: formData.get("customer_name"),
@@ -195,7 +236,7 @@ await postJson("/api/local-discovery/leads", {
 await postJson("/api/pilot-events", {
   eventType: "lead_submitted",
   driverSlug,
-  businessSlug: selectedBusiness
+  businessSlug: selectedBusinessSlug
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, ""),
@@ -211,6 +252,14 @@ await postJson("/api/pilot-events", {
     utm_campaign: utmCampaign,
   },
 });
+
+if (selectedBusinessSlug) {
+  window.localStorage.removeItem(
+    `rlg_attribution_token:${selectedBusinessSlug}`
+  );
+}
+
+submissionTokenRef.current = "";
 
 form.reset();
 setSubmitStatus("success");
@@ -249,7 +298,7 @@ setSubmitStatus("success");
               Business
             </span>
             <select
-              value={`${selectedBusiness}|||${selectedCategory}`}
+              value={selectedBusinessSlug}
               onChange={(event) => handleBusinessSelect(event.target.value)}
               className="mt-1 min-h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/15"
             >

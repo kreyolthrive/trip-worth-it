@@ -44,3 +44,5 @@ yarn-error.log*
 next-env.d.ts
 .env.local
 .env
+supabase/.temp/
+supabase/failed-migration-artifacts/

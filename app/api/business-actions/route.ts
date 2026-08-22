@@ -20,6 +20,7 @@ type RequestBody = {
   category?: string;
   actionType?: string;
   pagePath?: string;
+  visitorSessionId?: string;
   metadata?: Record<string, unknown>;
 };
 
@@ -35,12 +36,20 @@ type DriverRow = {
   driver_slug: string;
 };
 
+type ActionRpcRow = {
+  action_id: string;
+  referral_id: string | null;
+  attribution_token: string | null;
+};
+
 function getSupabaseConfig() {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+    throw new Error(
+      "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
+    );
   }
 
   return {
@@ -75,9 +84,11 @@ async function fetchBusinessBySlug(
   if (!businessSlug) return null;
 
   const response = await fetch(
-    `${supabaseUrl}/rest/v1/rlg_businesses?select=id,slug,business_name,category&slug=eq.${encodeURIComponent(
-      businessSlug
-    )}&limit=1`,
+    `${supabaseUrl}/rest/v1/rlg_businesses` +
+      `?select=id,slug,business_name,category` +
+      `&slug=eq.${encodeURIComponent(businessSlug)}` +
+      `&is_active=eq.true` +
+      `&limit=1`,
     {
       headers: {
         apikey: serviceRoleKey,
@@ -102,9 +113,11 @@ async function fetchDriverBySlug(
   if (!driverSlug) return null;
 
   const response = await fetch(
-    `${supabaseUrl}/rest/v1/drivers?select=id,driver_slug&driver_slug=eq.${encodeURIComponent(
-      driverSlug
-    )}&limit=1`,
+    `${supabaseUrl}/rest/v1/drivers` +
+      `?select=id,driver_slug` +
+      `&driver_slug=eq.${encodeURIComponent(driverSlug)}` +
+      `&status=eq.active` +
+      `&limit=1`,
     {
       headers: {
         apikey: serviceRoleKey,
@@ -129,7 +142,10 @@ export async function POST(request: Request) {
 
     if (!actionType || !allowedActionTypes.has(actionType)) {
       return NextResponse.json(
-        { ok: false, error: "Invalid action type" },
+        {
+          ok: false,
+          error: "Invalid action type",
+        },
         { status: 400 }
       );
     }
@@ -139,60 +155,121 @@ export async function POST(request: Request) {
     const driverSlug = cleanText(body.driverSlug, 160);
     const category = cleanText(body.category, 160);
     const pagePath = cleanText(body.pagePath, 500);
+    const visitorSessionId = cleanText(
+      body.visitorSessionId,
+      160
+    );
     const metadata = cleanMetadata(body.metadata);
 
-    const { supabaseUrl, serviceRoleKey } = getSupabaseConfig();
+    const { supabaseUrl, serviceRoleKey } =
+      getSupabaseConfig();
 
     const [business, driver] = await Promise.all([
-      fetchBusinessBySlug(supabaseUrl, serviceRoleKey, businessSlug),
-      fetchDriverBySlug(supabaseUrl, serviceRoleKey, driverSlug),
+      fetchBusinessBySlug(
+        supabaseUrl,
+        serviceRoleKey,
+        businessSlug
+      ),
+      fetchDriverBySlug(
+        supabaseUrl,
+        serviceRoleKey,
+        driverSlug
+      ),
     ]);
 
-    const insertPayload = {
-      business_id: business?.id ?? null,
-      driver_id: driver?.id ?? null,
+    /*
+     * Server-resolved database identities are authoritative.
+     *
+     * Client slugs/names remain useful as analytics snapshots when an
+     * entity is not found, but they never become trusted financial IDs.
+     */
+    const rpcPayload = {
+      p_business_id: business?.id ?? null,
+      p_driver_id: driver?.id ?? null,
 
-      driver_slug: driverSlug,
-      business_slug: businessSlug ?? business?.slug ?? null,
-      business_name: businessName ?? business?.business_name ?? null,
-      category: category ?? business?.category ?? null,
+      p_driver_slug:
+        driver?.driver_slug ?? driverSlug ?? null,
 
-      action_type: actionType,
-      page_path: pagePath,
-      metadata,
+      p_business_slug:
+        business?.slug ?? businessSlug ?? null,
+
+      p_business_name:
+        business?.business_name ?? businessName ?? null,
+
+      p_category:
+        business?.category ?? category ?? null,
+
+      p_action_type: actionType,
+      p_page_path: pagePath,
+      p_visitor_session_id: visitorSessionId,
+      p_metadata: metadata,
     };
 
-    const insertResponse = await fetch(`${supabaseUrl}/rest/v1/business_actions`, {
-      method: "POST",
-      headers: {
-        apikey: serviceRoleKey,
-        Authorization: `Bearer ${serviceRoleKey}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation",
-      },
-      body: JSON.stringify(insertPayload),
-      cache: "no-store",
-    });
+    const rpcResponse = await fetch(
+      `${supabaseUrl}/rest/v1/rpc/rlg_record_business_action_with_referral`,
+      {
+        method: "POST",
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(rpcPayload),
+        cache: "no-store",
+      }
+    );
 
-    if (!insertResponse.ok) {
-      const message = await insertResponse.text().catch(() => "");
+    if (!rpcResponse.ok) {
+      const message = await rpcResponse
+        .text()
+        .catch(() => "");
+
+      console.error(
+        "[business-actions:rpc]",
+        rpcResponse.status,
+        message
+      );
+
       return NextResponse.json(
-        { ok: false, error: "Failed to record business action", message },
+        {
+          ok: false,
+          error: "Failed to record business action",
+        },
         { status: 500 }
       );
     }
 
-    const insertedRows = (await insertResponse.json()) as { id: string }[];
+    const rows = (await rpcResponse.json()) as ActionRpcRow[];
+    const result = rows[0];
+
+    if (!result?.action_id) {
+      console.error(
+        "[business-actions:rpc] RPC returned no action ID"
+      );
+
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Business action was not confirmed",
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       ok: true,
-      actionId: insertedRows[0]?.id ?? null,
+      actionId: result.action_id,
+      referralId: result.referral_id,
+      attributionToken: result.attribution_token,
     });
   } catch (error) {
     console.error("[business-actions:post]", error);
 
     return NextResponse.json(
-      { ok: false, error: "Unexpected business action error" },
+      {
+        ok: false,
+        error: "Unexpected business action error",
+      },
       { status: 500 }
     );
   }

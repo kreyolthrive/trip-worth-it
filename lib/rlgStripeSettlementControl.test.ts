@@ -64,6 +64,24 @@ describe("RLG Patch 6 Stripe settlement control contract", () => {
     expect(migration).toContain("payment_intent_mismatch");
   });
 
+  it("fails closed on malformed or identity-drifted Stripe webhook events", () => {
+    expect(migration).toContain(
+      "v_settlement_found boolean := false"
+    );
+    expect(migration).toContain(
+      "v_settlement_found := found"
+    );
+    expect(migration).toContain(
+      "if not v_settlement_found then"
+    );
+    expect(migration).toContain(
+      "PaymentIntent id is required for payment_intent webhook events"
+    );
+    expect(migration).toContain(
+      "Stripe event id was replayed with different immutable event identity"
+    );
+  });
+
   it("does not treat synchronous Stripe submission as final payment authority", () => {
     expect(migration).toContain(
       "payment_intent.succeeded webhook remains the settlement authority"

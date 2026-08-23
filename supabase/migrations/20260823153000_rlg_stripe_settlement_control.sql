@@ -1102,12 +1102,21 @@ declare
   v_transaction public.rlg_transactions%rowtype;
   v_decision text;
   v_processing_status text;
+  v_settlement_found boolean := false;
 begin
   if nullif(trim(p_stripe_event_id), '') is null
      or nullif(trim(p_event_type), '') is null
   then
     raise exception
       'Stripe event id and event type are required'
+      using errcode = '22023';
+  end if;
+
+  if p_event_type like 'payment_intent.%'
+     and nullif(trim(p_payment_intent_id), '') is null
+  then
+    raise exception
+      'PaymentIntent id is required for payment_intent webhook events'
       using errcode = '22023';
   end if;
 
@@ -1140,6 +1149,24 @@ begin
   where w.stripe_event_id = p_stripe_event_id
   for update;
 
+  if
+    v_webhook.event_type
+      is distinct from p_event_type
+    or v_webhook.stripe_object_id
+      is distinct from p_stripe_object_id
+    or v_webhook.stripe_payment_intent_id
+      is distinct from p_payment_intent_id
+    or v_webhook.stripe_charge_id
+      is distinct from p_charge_id
+    or v_webhook.livemode
+      is distinct from p_livemode
+    or v_webhook.payload_sha256
+      is distinct from p_payload_sha256
+  then
+    raise exception
+      'Stripe event id was replayed with different immutable event identity';
+  end if;
+
   if v_webhook.processing_status in ('processed', 'ignored') then
     return query
     select
@@ -1160,15 +1187,22 @@ begin
     where s.id = p_settlement_id
     for update;
 
+    v_settlement_found := found;
+
   elsif nullif(trim(p_payment_intent_id), '') is not null then
     select s.*
     into v_settlement
     from public.rlg_stripe_settlements s
     where s.stripe_payment_intent_id = p_payment_intent_id
     for update;
+
+    v_settlement_found := found;
+
+  else
+    v_settlement_found := false;
   end if;
 
-  if not found then
+  if not v_settlement_found then
     update public.rlg_stripe_webhook_events w
     set
       processing_status = 'ignored',

@@ -10,33 +10,43 @@ import {
 } from "./storage";
 import { RecentTripCheck } from "../types/trip";
 
-class LocalStorageMock {
+class LocalStorageMock implements Storage {
   private store = new Map<string, string>();
 
-  getItem(key: string) {
+  get length(): number {
+    return this.store.size;
+  }
+
+  key(index: number): string | null {
+    return Array.from(this.store.keys())[index] ?? null;
+  }
+
+  getItem(key: string): string | null {
     return this.store.has(key) ? this.store.get(key)! : null;
   }
 
-  setItem(key: string, value: string) {
+  setItem(key: string, value: string): void {
     this.store.set(key, value);
   }
 
-  removeItem(key: string) {
+  removeItem(key: string): void {
     this.store.delete(key);
   }
 
-  clear() {
+  clear(): void {
     this.store.clear();
   }
 }
 
 function mockWindow() {
   const localStorage = new LocalStorageMock();
-  const globalWithWindow = globalThis as typeof globalThis & {
-    window?: { localStorage: LocalStorageMock };
-  };
 
-  globalWithWindow.window = { localStorage };
+  Object.defineProperty(globalThis, "window", {
+    value: { localStorage },
+    writable: true,
+    configurable: true,
+  });
+
   return localStorage;
 }
 
